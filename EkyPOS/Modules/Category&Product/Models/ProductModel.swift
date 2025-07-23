@@ -16,3 +16,10 @@ class ProductModel: Object {
     @Persisted var price: Double
     @Persisted var image: String = ""
 }
+
+extension ProductModel {
+    static func == (lhs: ProductModel, rhs: ProductModel) -> Bool {
+        return lhs._id == rhs._id // Primary key comparison
+    }
+}
+

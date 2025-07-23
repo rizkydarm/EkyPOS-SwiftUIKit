@@ -10,14 +10,26 @@ import SnapKit
 
 class SalesViewController: UIViewController {
     
+    private let productRepo = ProductRepo()
+    private var products: [ProductModel] = []
+    private var selectedProducts = Set<ProductModel>()
+
     private let searchController = UISearchController(searchResultsController: nil)
     private let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
     }()
-    
-    private var items = Array(1...20).map { "Item \($0)" }
+
+    private let emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No product"
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.font = UIFont.preferredFont(forTextStyle: .title2)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,15 +61,24 @@ class SalesViewController: UIViewController {
         
         navigationItem.searchController = searchController
         
-//        tableView.decelerationRate = .normal
-//        tableView.contentInsetAdjustmentBehavior = .never
-//        tableView.contentInset = UIEdgeInsets(top: 0,left: 0,bottom: 0,right: 0)
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+        view.addSubview(emptyLabel)
+        emptyLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
+        loadAllProducts()
+    }
+    
+    private func loadAllProducts() {
+        products = productRepo.getAllProducts()
+        tableView.reloadData()
+        emptyLabel.isHidden = !products.isEmpty
     }
 
 }
@@ -65,36 +86,78 @@ class SalesViewController: UIViewController {
 extension SalesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        100
+        60
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        return products.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        let item = items[indexPath.row]
         
-        var config = cell.defaultContentConfiguration()
-        config.text = item
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
+        cell.backgroundColor = .systemBackground
+        
+        let product = products[indexPath.row]
+        
+        let emoji = UILabel()
+        emoji.textColor = .label
+        emoji.font = .systemFont(ofSize: 24, weight: .bold)
+        emoji.text = product.image.containsEmoji ? product.image : "🟤"
+        cell.contentView.addSubview(emoji)
+        emoji.snp.makeConstraints { make in
+            make.left.equalToSuperview().inset(20)
+            make.centerY.equalToSuperview()
+        }
+        
+        let label = UILabel()
+        label.textColor = .label
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.text = product.name
+        cell.contentView.addSubview(label)
+        label.snp.makeConstraints { make in
+            make.left.equalTo(emoji.snp.right).offset(20)
+            make.centerY.equalToSuperview()
+        }
+        let subLabel = UILabel()
+        subLabel.textColor = .secondaryLabel
+        subLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        subLabel.text = rpCurrencyFormatter.string(from: product.price as NSNumber)
+        cell.contentView.addSubview(subLabel)
+        subLabel.snp.makeConstraints { make in
+            make.left.equalTo(label.snp.right).offset(10)
+            make.centerY.equalToSuperview()
+        }
 
-        config.secondaryText = "Subtitle for \(item)"
-        config.secondaryTextProperties.font = .systemFont(ofSize: 14)
-        config.secondaryTextProperties.color = .secondaryLabel
-        
-        cell.contentConfiguration = config
-        
-        let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
-        cell.accessoryView = UIImageView(image: UIImage(systemName: "chevron.right", withConfiguration: imageConfig))
-        
-        cell.backgroundColor = .quaternarySystemFill
+        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
+        let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill")?.withConfiguration(config))
+        checkmark.tintColor = .systemGreen
+        checkmark.isHidden = !selectedProducts.contains(product)
+        cell.contentView.addSubview(checkmark)
+        checkmark.snp.makeConstraints { make in
+            make.right.equalToSuperview().inset(20)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(30)
+        }
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        tableView.performBatchUpdates({
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        })
+
+        
         tableView.deselectRow(at: indexPath, animated: true)
+        let seletedProduct = products[indexPath.row]
+        if selectedProducts.contains(seletedProduct) {
+            selectedProducts.remove(seletedProduct)
+        } else {
+            selectedProducts.insert(seletedProduct)
+        }
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }
 
@@ -103,11 +166,10 @@ extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard !searchText.isEmpty else {
-            items = Array(1...20).map { "Item \($0)" }
-            tableView.reloadData()
+            loadAllProducts()
             return
         }
-        items = Array(1...20).map { "Item \($0)" }.filter { $0.lowercased().contains(searchText.lowercased()) }
+        products = productRepo.searchProducts(name: searchText)
         tableView.reloadData()
     }
 }
