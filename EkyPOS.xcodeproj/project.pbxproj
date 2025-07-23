@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D71B17F6A75FC17402CB4F8F /* Pods_EkyPOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF4D8D04D2FEA92413A66C36 /* Pods_EkyPOS.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		257AC0082E2F140900A06C09 /* EkyPOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EkyPOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C500D68BDCBB1EED6EAC4C4A /* Pods-EkyPOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EkyPOS.release.xcconfig"; path = "Target Support Files/Pods-EkyPOS/Pods-EkyPOS.release.xcconfig"; sourceTree = "<group>"; };
+		DF4D8D04D2FEA92413A66C36 /* Pods_EkyPOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_EkyPOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBB52043855C90F326F32464 /* Pods-EkyPOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EkyPOS.debug.xcconfig"; path = "Target Support Files/Pods-EkyPOS/Pods-EkyPOS.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D71B17F6A75FC17402CB4F8F /* Pods_EkyPOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +55,8 @@
 			children = (
 				257AC00A2E2F140900A06C09 /* EkyPOS */,
 				257AC0092E2F140900A06C09 /* Products */,
+				32748133BEF57E64519BB6E4 /* Pods */,
+				CE080E9A827C493E5D78BF56 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,6 +68,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		32748133BEF57E64519BB6E4 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EBB52043855C90F326F32464 /* Pods-EkyPOS.debug.xcconfig */,
+				C500D68BDCBB1EED6EAC4C4A /* Pods-EkyPOS.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		CE080E9A827C493E5D78BF56 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DF4D8D04D2FEA92413A66C36 /* Pods_EkyPOS.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -65,9 +92,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 257AC01B2E2F140B00A06C09 /* Build configuration list for PBXNativeTarget "EkyPOS" */;
 			buildPhases = (
+				352A7AB874BC091DEF781AFC /* [CP] Check Pods Manifest.lock */,
 				257AC0042E2F140900A06C09 /* Sources */,
 				257AC0052E2F140900A06C09 /* Frameworks */,
 				257AC0062E2F140900A06C09 /* Resources */,
+				06E5CEC8A509EDE142D8FC5A /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -77,8 +106,6 @@
 				257AC00A2E2F140900A06C09 /* EkyPOS */,
 			);
 			name = EkyPOS;
-			packageProductDependencies = (
-			);
 			productName = EkyPOS;
 			productReference = 257AC0082E2F140900A06C09 /* EkyPOS.app */;
 			productType = "com.apple.product-type.application";
@@ -127,6 +154,52 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		06E5CEC8A509EDE142D8FC5A /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-EkyPOS/Pods-EkyPOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-EkyPOS/Pods-EkyPOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-EkyPOS/Pods-EkyPOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		352A7AB874BC091DEF781AFC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-EkyPOS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		257AC0042E2F140900A06C09 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -140,6 +213,7 @@
 /* Begin XCBuildConfiguration section */
 		257AC01C2E2F140B00A06C09 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EBB52043855C90F326F32464 /* Pods-EkyPOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -148,11 +222,14 @@
 				DEVELOPMENT_TEAM = QHWS6Y2JRB;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EkyPOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Eky POS";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -168,6 +245,7 @@
 		};
 		257AC01D2E2F140B00A06C09 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C500D68BDCBB1EED6EAC4C4A /* Pods-EkyPOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -176,11 +254,14 @@
 				DEVELOPMENT_TEAM = QHWS6Y2JRB;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EkyPOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Eky POS";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -232,7 +313,7 @@
 				DEVELOPMENT_TEAM = QHWS6Y2JRB;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -296,7 +377,7 @@
 				DEVELOPMENT_TEAM = QHWS6Y2JRB;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

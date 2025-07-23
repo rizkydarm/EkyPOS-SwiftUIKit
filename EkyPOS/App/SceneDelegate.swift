@@ -6,17 +6,54 @@
 //
 
 import UIKit
+import SideMenuSwift
+import RealmSwift
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        configureGlobalSideMenuController()
+        
+        window = UIWindow(windowScene: windowScene)
+        window?.rootViewController = SideMenuController(
+            contentViewController: UINavigationController(rootViewController: SalesViewController()),
+            menuViewController: MenuViewController())
+        window?.makeKeyAndVisible()
+    }
+    
+    private func configureGlobalSideMenuController() {
+        SideMenuController.preferences.basic.direction = .left
+        SideMenuController.preferences.basic.defaultCacheKey = "0"
+        SideMenuController.preferences.basic.hideMenuWhenEnteringBackground = true 
+        SideMenuController.preferences.basic.position = .above
+        SideMenuController.preferences.basic.enablePanGesture = false
+    }
+    
+    func deleteRealmDatabase() {
+        guard let realmURL = Realm.Configuration.defaultConfiguration.fileURL else { return }
+        
+        let realmURLs = [
+            realmURL,
+            realmURL.appendingPathExtension("lock"),
+            realmURL.appendingPathExtension("note"),
+            realmURL.appendingPathExtension("management")
+        ]
+        
+        for url in realmURLs {
+            do {
+                try FileManager.default.removeItem(at: url)
+                print("Deleted Realm file at: \(url)")
+            } catch {
+                print("Error deleting Realm file: \(error.localizedDescription)")
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
