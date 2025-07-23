@@ -1,0 +1,46 @@
+# Name of the workflow
+name: iOS CI
+
+# Triggers - when this workflow will run
+on:
+  push:
+    branches: [ "main" ]  # Triggers on push to main branch
+  pull_request:
+    branches: [ "main" ]  # Triggers on PRs to main branch
+
+# Jobs to run
+jobs:
+  build:
+    name: Build
+    runs-on: macos-latest  # Using latest macOS runner
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 'latest-stable'
+
+    - name: Install CocoaPods
+      run: |
+        brew install cocoapods
+
+    - name: Install Pods
+      run: |
+        pod install --clean-install
+
+    - name: Build iOS App
+      run: |
+        SKIP_LINT=1 \
+          xcodebuild build \
+          ARCHS=arm64 VALID_ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+          -workspace EkyPOS.xcworkspace \
+          -scheme "EkyPOS" \
+          -configuration Debug \
+          -destination 'platform=iOS Simulator,OS=17.4,name=iPhone 15' \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          -allowProvisioningUpdates \
+          | xcbeautify
