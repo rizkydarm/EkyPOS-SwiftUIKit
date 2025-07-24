@@ -110,7 +110,7 @@ class PaymentViewController: UIViewController {
         view.addSubview(switchNominal)
         switchNominal.snp.makeConstraints { make in
             make.top.equalTo(nominalTextField.snp.bottom).offset(20)
-            make.trailing.equalToSuperview().inset(20)
+            make.leading.equalToSuperview().inset(20)
         }
 
         view.addSubview(actionButton)
