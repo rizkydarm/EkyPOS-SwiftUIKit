@@ -30,6 +30,33 @@ class SalesViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    private let bottomToolbar: UIToolbar = {
+        let toolbar = UIToolbar()
+        let appearance = UIToolbarAppearance()
+        
+        // Match your navigation bar styling
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        appearance.shadowColor = .clear
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
+        toolbar.standardAppearance = appearance
+        toolbar.compactAppearance = appearance
+        toolbar.scrollEdgeAppearance = appearance
+    
+        return toolbar
+        }()
+        
+    private let actionButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Checkout", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        button.backgroundColor = .systemBrown
+        button.tintColor = .label
+        button.layer.cornerRadius = 8
+        button.enableBounceAnimation()
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,6 +98,8 @@ class SalesViewController: UIViewController {
         emptyLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
+
+        setupToolbar()
         
         loadAllProducts()
     }
@@ -79,6 +108,31 @@ class SalesViewController: UIViewController {
         products = productRepo.getAllProducts()
         tableView.reloadData()
         emptyLabel.isHidden = !products.isEmpty
+    }
+    
+    private func setupToolbar() {
+        // Create flexible spaces to center the button
+        
+        let buttonItem = UIBarButtonItem(customView: actionButton)
+        
+        bottomToolbar.items = [buttonItem]
+        
+        view.addSubview(bottomToolbar)
+        
+        bottomToolbar.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            make.height.equalTo(100)
+        }
+        
+        actionButton.snp.makeConstraints { make in
+            make.height.equalTo(60)
+        }
+        
+        // Button action
+        actionButton.addAction(UIAction { [weak self] _ in
+            
+        }, for: .touchUpInside)
     }
 
 }
