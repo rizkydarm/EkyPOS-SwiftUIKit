@@ -12,7 +12,10 @@ class SalesViewController: UIViewController {
     
     private let productRepo = ProductRepo()
     private var products: [ProductModel] = []
-    private var selectedProducts = Set<ProductModel>()
+    
+    private let cartViewModel = CartViewModel.shared
+    
+    private var selectedProducts: Set<ProductModel> = []
 
     private let searchController = UISearchController(searchResultsController: nil)
     private let tableView: UITableView = {
@@ -31,21 +34,17 @@ class SalesViewController: UIViewController {
         return label
     }()
     
-    private let bottomToolbar: UIToolbar = {
-        let toolbar = UIToolbar()
-        let appearance = UIToolbarAppearance()
-        
-        // Match your navigation bar styling
-        appearance.configureWithDefaultBackground()
-        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        appearance.shadowColor = .clear
-        toolbar.translatesAutoresizingMaskIntoConstraints = false
-        toolbar.standardAppearance = appearance
-        toolbar.compactAppearance = appearance
-        toolbar.scrollEdgeAppearance = appearance
-    
-        return toolbar
-        }()
+    private let bottomBar: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemBackground
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        view.addSubview(blurView)
+        blurView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        return view
+    }()
         
     private let actionButton: UIButton = {
         let button = UIButton(type: .system)
@@ -99,7 +98,7 @@ class SalesViewController: UIViewController {
             make.center.equalToSuperview()
         }
 
-        setupToolbar()
+        setupBottomBar()
         
         loadAllProducts()
     }
@@ -110,28 +109,29 @@ class SalesViewController: UIViewController {
         emptyLabel.isHidden = !products.isEmpty
     }
     
-    private func setupToolbar() {
-        // Create flexible spaces to center the button
+    private func setupBottomBar() {
         
-        let buttonItem = UIBarButtonItem(customView: actionButton)
-        
-        bottomToolbar.items = [buttonItem]
-        
-        view.addSubview(bottomToolbar)
-        
-        bottomToolbar.snp.makeConstraints { make in
+        view.addSubview(bottomBar)
+        bottomBar.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            make.height.equalTo(100)
+            make.bottom.equalToSuperview()
         }
         
+        bottomBar.addSubview(actionButton)
         actionButton.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(60)
+            make.top.equalTo(bottomBar.snp.top).inset(20)
+            make.bottom.equalTo(bottomBar.safeAreaLayoutGuide.snp.bottom).inset(20)
         }
-        
-        // Button action
+
         actionButton.addAction(UIAction { [weak self] _ in
-            
+            if self?.selectedProducts.isEmpty == true {
+                showToast(.info, vc: self!, message: "Please select at least one product", seconds: 1)
+            } else {
+                let vc = CheckoutViewController()
+                self?.navigationController?.pushViewController(vc, animated: true)
+            }
         }, for: .touchUpInside)
     }
 
@@ -202,15 +202,17 @@ extension SalesViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.performBatchUpdates({
             tableView.reloadRows(at: [indexPath], with: .automatic)
         })
-
-        
         tableView.deselectRow(at: indexPath, animated: true)
+        
         let seletedProduct = products[indexPath.row]
         if selectedProducts.contains(seletedProduct) {
             selectedProducts.remove(seletedProduct)
         } else {
             selectedProducts.insert(seletedProduct)
         }
+        
+        cartViewModel.toggleProduct(seletedProduct)
+        
         tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }

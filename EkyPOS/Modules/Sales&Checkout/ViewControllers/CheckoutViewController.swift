@@ -6,14 +6,56 @@
 //
 
 import UIKit
-
+import Combine
 
 class CheckoutViewController: UIViewController {
+    
+    private let cartViewModel = CartViewModel.shared
+    private var cancellables = Set<AnyCancellable>()
     
     private let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
+    }()
+
+    private let bottomBar: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemBackground
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        view.addSubview(blurView)
+        blurView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        return view
+    }()
+
+    private let actionButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Pay", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        button.backgroundColor = .systemBrown
+        button.tintColor = .label
+        button.layer.cornerRadius = 8
+        button.enableBounceAnimation()
+        return button
+    }()
+
+    let totalPriceLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .label
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        return label
+    }()
+    
+    let totalUnitLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .label
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return label
     }()
     
     override func viewDidLoad() {
@@ -22,16 +64,92 @@ class CheckoutViewController: UIViewController {
         title = "Checkout"
         view.backgroundColor = .systemBackground
         
+        navigationItem.largeTitleDisplayMode = .never
+        
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.register(CartProductTableViewCell.self, forCellReuseIdentifier: "CartProductCell")
         tableView.separatorStyle = .singleLine
         
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        let rowPrice = LabelRowStack()
+        let leftPriceLabel = UILabel()
+        leftPriceLabel.text = "Total price"
+        leftPriceLabel.font = .systemFont(ofSize: 16)
+        leftPriceLabel.textColor = .label
+        rowPrice.setLeftLabel(leftLabel: leftPriceLabel)
+        rowPrice.setRightLabel(rightLabel: totalPriceLabel)
+        stackView.addArrangedSubview(rowPrice)
+
+        let rowUnit: LabelRowStack = LabelRowStack()
+        let leftUnitLabel = UILabel()
+        leftUnitLabel.text = "Total unit"
+        leftUnitLabel.font = .systemFont(ofSize: 16)
+        leftUnitLabel.textColor = .label
+        rowUnit.setLeftLabel(leftLabel: leftUnitLabel)
+        rowUnit.setRightLabel(rightLabel: totalUnitLabel)
+        stackView.addArrangedSubview(rowUnit)
+
+        actionButton.addAction(UIAction { [weak self] _ in
+            let vc = PaymentViewController()
+            self?.navigationController?.pushViewController(vc, animated: true)
+        }, for: .touchUpInside)
+
+        bottomBar.addSubview(stackView)
+        stackView.snp.makeConstraints { make in
+            make.left.right.equalToSuperview().inset(20)
+            make.top.equalTo(bottomBar.snp.top).inset(20)
+        }
+
+        bottomBar.addSubview(actionButton)
+        actionButton.snp.makeConstraints { make in
+            make.height.equalTo(60)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.bottom.equalTo(bottomBar.safeAreaLayoutGuide.snp.bottom).inset(20)
+            make.top.equalTo(stackView.snp.bottom).offset(20)
+        }
         
+        view.addSubview(bottomBar)
+        bottomBar.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalToSuperview()
+        }
+        
+        setupBindings()
     }
+    
+    private func setupBindings() {
+        
+        cartViewModel.cartProductsPublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] cartProducts in
+                self?.updateTotalPrice(cartProducts: cartProducts)
+                self?.updateTotalUnit(cartProducts: cartProducts)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateTotalPrice(cartProducts: [CartProductModel]) {
+        let price = cartProducts.reduce(0) { $0 + ($1.product.price * Double($1.total)) }
+        totalPriceLabel.text = rpCurrencyFormatter.string(from: price as NSNumber)
+    }
+    
+    private func updateTotalUnit(cartProducts: [CartProductModel]) {
+        let units = cartProducts.reduce(0) { $0 + $1.total }
+        totalUnitLabel.text = String(units)
+    }
+    
 }
 
 extension CheckoutViewController: UITableViewDelegate, UITableViewDataSource {
@@ -41,84 +159,18 @@ extension CheckoutViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        return cartViewModel.cartProducts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.backgroundColor = .systemBackground
-        
-        let category = categories[indexPath.row]
-        
-        let emoji = UILabel()
-        emoji.textColor = .label
-        emoji.font = .systemFont(ofSize: 24, weight: .bold)
-        emoji.text = category.image.containsEmoji ? category.image : "🟤"
-        cell.contentView.addSubview(emoji)
-        emoji.snp.makeConstraints { make in
-            make.left.equalToSuperview().inset(20)
-            make.centerY.equalToSuperview()
-        }
-        
-        let label = UILabel()
-        label.textColor = .label
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.text = category.name
-        cell.contentView.addSubview(label)
-        label.snp.makeConstraints { make in
-            make.left.equalTo(emoji.snp.right).offset(20)
-            make.centerY.equalToSuperview()
-        }
-        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CartProductCell", for: indexPath) as! CartProductTableViewCell
+        cell.configure(with: cartViewModel.cartProducts[indexPath.row])
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedCategory = categories[indexPath.row]
-        navigationController?.pushViewController(ProductViewController(category: selectedCategory), animated: true)
-    }
-    
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-                    
-        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (_, _, completion) in
-            guard let self = self else { return }
-            self.deleteCategory(at: indexPath)
-            completion(true)
-        }
-        deleteAction.backgroundColor = .systemRed
-        deleteAction.image = UIImage(systemName: "trash")
-        
-        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (_, _, completion) in
-            guard let self = self else { return }
-            let vc = AddCategoryViewController()
-            let selectedCategory = categories[indexPath.row]
-            vc.editingMode = (selectedCategory.name, selectedCategory.image)
-            vc.didInputComplete = { [weak self] (text, image) in
-                guard let self = self else { return }
-                self.editCategory(at: indexPath, newName: text, newImage: image)
-                self.loadCategories()
-            }
-            self.present(vc, animated: true)
-            completion(true)
-        }
-        editAction.backgroundColor = .systemBlue
-        editAction.image = UIImage(systemName: "pencil")
-        
-        return UISwipeActionsConfiguration(actions: [deleteAction, editAction])
-    }
-    
-    private func deleteCategory(at indexPath: IndexPath) {
-        let category = categories[indexPath.row]
-        categoryRepo.deleteCategory(id: category._id)
-        categories.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .automatic)
-    }
-    private func editCategory(at indexPath: IndexPath, newName: String, newImage: String?) {
-        let category = categories[indexPath.row]
-        categoryRepo.updateCategory(id: category._id, newName: newName, newImage: newImage)
-        categories.remove(at: indexPath.row)
     }
 }
 

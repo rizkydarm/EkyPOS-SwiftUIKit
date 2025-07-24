@@ -34,7 +34,7 @@ enum ToastType {
     
     var color: UIColor {
         switch self {
-        case .info: return .systemBlue
+        case .info: return .systemYellow
         case .error: return .systemRed
         case .warning: return .systemOrange
         case .success: return .systemGreen
@@ -46,7 +46,8 @@ func showToast(_ type: ToastType, vc: UIViewController, message: String, seconds
     let alert = UIAlertController(title: type.title, message: message, preferredStyle: .actionSheet)
     
     alert.view.backgroundColor = type.color
-    alert.view.layer.cornerRadius = 8
+    alert.view.layer.cornerRadius = 16
+    alert.view.layer.masksToBounds = true
     
     vc.present(alert, animated: true)
     

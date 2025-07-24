@@ -5,45 +5,52 @@
 //  Created by Eky on 23/07/25.
 //
 
+import UIKit
 
 extension UIButton {
-    func addBounceAnimation(
-        duration: TimeInterval = 0.2,
-        scale: CGFloat = 0.95,
-        completion: (() -> Void)? = nil
-    ) {
-        addTarget(self, action: #selector(animateAdvancedBounce), for: .touchUpInside)
-        // Store completion in associated object
-        objc_setAssociatedObject(self, &AssociatedKeys.completion, completion, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    private struct AssociatedKeys {
+        static var feedbackGeneratorKey = "feedbackGeneratorKey"
     }
     
-    @objc private func animateAdvancedBounce() {
+    // Associated property for haptic feedback
+    private var feedbackGenerator: UIImpactFeedbackGenerator? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKeys.feedbackGeneratorKey) as? UIImpactFeedbackGenerator
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKeys.feedbackGeneratorKey, newValue, .OBJC_ASSOCIATION_RETAIN)
+        }
+    }
+    
+    /// Enables bounce animation with optional haptic feedback
+    func enableBounceAnimation(enableHaptic: Bool = true) {
+        if enableHaptic {
+            feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+        }
+        
+        addTarget(self, action: #selector(bounceAnimatePress), for: .touchDown)
+        addTarget(self, action: #selector(bounceAnimateRelease), for: [.touchUpInside, .touchCancel])
+    }
+    
+    @objc private func bounceAnimatePress() {
+        feedbackGenerator?.impactOccurred()
+        bounceAnimateTransform(scale: 0.96)
+    }
+    
+    @objc private func bounceAnimateRelease() {
+        bounceAnimateTransform(scale: 1.0)
+    }
+    
+    private func bounceAnimateTransform(scale: CGFloat) {
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: 0.4,
+            delay: 0,
+            usingSpringWithDamping: 0.4,
+            initialSpringVelocity: 10,
+            options: [.allowUserInteraction, .curveEaseOut],
             animations: {
-                self.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-            },
-            completion: { _ in
-                UIView.animate(
-                    withDuration: 0.2,
-                    delay: 0,
-                    usingSpringWithDamping: 0.4,
-                    initialSpringVelocity: 6,
-                    options: [.allowUserInteraction],
-                    animations: {
-                        self.transform = .identity
-                    },
-                    completion: { _ in
-                        if let completion = objc_getAssociatedObject(self, &AssociatedKeys.completion) as? () -> Void {
-                            completion()
-                        }
-                    }
-                )
+                self.transform = scale == 1.0 ? .identity : CGAffineTransform(scaleX: scale, y: scale)
             }
         )
     }
-}
-
-private struct AssociatedKeys {
-    static var completion: UInt8 = 0
 }
