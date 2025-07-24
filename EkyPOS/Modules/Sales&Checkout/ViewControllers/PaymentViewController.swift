@@ -113,6 +113,18 @@ class PaymentViewController: UIViewController {
             make.leading.equalToSuperview().inset(20)
         }
 
+        let switchLabel = UILabel()
+        switchLabel.textColor = .secondaryLabel
+        switchLabel.font = .systemFont(ofSize: 16, weight: .bold)
+        switchLabel.text = "Auto nominal"
+        switchLabel.textAlignment = .left
+
+        view.addSubview(switchLabel)
+        switchLabel.snp.makeConstraints { make in
+            make.leading.equalTo(switchNominal.snp.right).offset(20)
+            make.centerY.equalTo(switchNominal)
+        }
+
         view.addSubview(actionButton)
         actionButton.snp.makeConstraints { make in
             make.top.equalTo(switchNominal.snp.bottom).offset(20)
@@ -120,5 +132,15 @@ class PaymentViewController: UIViewController {
             make.width.equalToSuperview().inset(20)
             make.height.equalTo(60)
         }
+
+        switchNominal.addAction(UIAction { [weak self] _ in
+            if self?.switchNominal.isOn == true {
+                self?.nominalTextField.text = "Rp 200.000"
+                self?.nominalTextField.isEnabled = false
+            } else {
+                self?.nominalTextField.text = ""
+                self?.nominalTextField.isEnabled = false
+            }
+        }, for: .valueChanged) 
     }
 }
