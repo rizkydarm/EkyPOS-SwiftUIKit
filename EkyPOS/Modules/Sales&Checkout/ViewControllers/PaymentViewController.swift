@@ -10,6 +10,8 @@ import SnapKit
 
 class PaymentViewController: UIViewController {
 
+    var checkoutModel: CheckoutModel?
+
     private let amountLabel: UILabel = {
         let label = UILabel()
         label.textColor = .label
@@ -37,6 +39,7 @@ class PaymentViewController: UIViewController {
         tf.heightAnchor.constraint(equalToConstant: 40).isActive = true
         return tf
     }()
+    private var nominalValue: Double = 0
 
     private let actionButton: UIButton = {
         let button = UIButton(type: .system)
@@ -71,8 +74,12 @@ class PaymentViewController: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(20)
             make.centerX.equalToSuperview()
         }
+        if let totalPrice = checkoutModel?.totalPrice {
+            amountLabel.text = rpCurrencyFormatter.string(from: totalPrice as NSNumber) ?? "-"
+        } else {
+            amountLabel.text = "-"
+        }
         
-        amountLabel.text = "Rp 200.000"
         view.addSubview(amountLabel)
         amountLabel.snp.makeConstraints { make in
             make.top.equalTo(totalPriceLabel.snp.bottom).offset(8)
@@ -133,13 +140,42 @@ class PaymentViewController: UIViewController {
             make.height.equalTo(60)
         }
 
-        switchNominal.addAction(UIAction { [weak self] _ in
-            if self?.switchNominal.isOn == true {
-                self?.nominalTextField.text = "Rp 200.000"
-                self?.nominalTextField.isEnabled = false
+        actionButton.addAction(UIAction { [weak self] _ in
+            guard let self = self else { return }
+            if self.switchNominal.isOn == true {
+                let invoiceVC = InvoiceViewController()
+                if let checkoutModel = self.checkoutModel {
+                    invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel)
+                }
+                self.navigationController?.pushViewController(invoiceVC, animated: true)
             } else {
-                self?.nominalTextField.text = ""
-                self?.nominalTextField.isEnabled = true
+                let totalPrice = self.checkoutModel?.totalPrice ?? 0
+                self.nominalValue = currencyTextFieldDelegate.getRawValue(for: self.nominalTextField)
+                if self.nominalValue < totalPrice {
+                    showToast(.error, vc: self, message: "Nominal is less than total price", seconds: 1)
+                } else {
+                    let invoiceVC = InvoiceViewController()
+                    if let checkoutModel = self.checkoutModel {
+                        let changes = self.nominalValue - totalPrice
+                        invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel, changes: changes)
+                    }
+                    self.navigationController?.pushViewController(invoiceVC, animated: true)
+                }
+            }
+        }, for: .touchUpInside)
+
+        switchNominal.addAction(UIAction { [weak self] _ in
+            guard let self = self else { return }
+            if self.switchNominal.isOn == true {
+                if let totalPrice = self.checkoutModel?.totalPrice {
+                    self.nominalTextField.text = rpCurrencyFormatter.string(from: totalPrice as NSNumber)
+                }
+                self.nominalValue = 0
+                self.nominalTextField.isEnabled = false
+            } else {
+                self.nominalTextField.text = ""
+                self.nominalValue = 0
+                self.nominalTextField.isEnabled = true
             }
         }, for: .valueChanged) 
     }

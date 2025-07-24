@@ -57,6 +57,8 @@ class CheckoutViewController: UIViewController {
         label.setContentCompressionResistancePriority(.required, for: .horizontal)
         return label
     }()
+
+    private var checkoutModel = CheckoutModel(cartProducts: [], totalPrice: 0, totalUnit: 0)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,8 +104,12 @@ class CheckoutViewController: UIViewController {
         stackView.addArrangedSubview(rowUnit)
 
         actionButton.addAction(UIAction { [weak self] _ in
-            let vc = PaymentViewController()
-            self?.navigationController?.pushViewController(vc, animated: true)
+            guard let self = self else { return }
+            if self.checkoutModel.cartProducts.isEmpty == false {
+                let vc = PaymentViewController()
+                vc.checkoutModel = self.checkoutModel
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
         }, for: .touchUpInside)
 
         bottomBar.addSubview(stackView)
@@ -136,17 +142,20 @@ class CheckoutViewController: UIViewController {
             .sink { [weak self] cartProducts in
                 self?.updateTotalPrice(cartProducts: cartProducts)
                 self?.updateTotalUnit(cartProducts: cartProducts)
+                self?.checkoutModel.cartProducts = cartProducts
             }
             .store(in: &cancellables)
     }
     
     private func updateTotalPrice(cartProducts: [CartProductModel]) {
         let price = cartProducts.reduce(0) { $0 + ($1.product.price * Double($1.total)) }
+        checkoutModel.totalPrice = price
         totalPriceLabel.text = rpCurrencyFormatter.string(from: price as NSNumber)
     }
     
     private func updateTotalUnit(cartProducts: [CartProductModel]) {
         let units = cartProducts.reduce(0) { $0 + $1.total }
+        checkoutModel.totalUnit = units
         totalUnitLabel.text = String(units)
     }
     

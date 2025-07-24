@@ -164,31 +164,3 @@ class AddProductViewController: UIViewController {
         navigationController?.navigationBar.scrollEdgeAppearance = UINavigationBar.appearance().scrollEdgeAppearance
     }
 }
-
-class CurrencyTextFieldDelegate: NSObject, UITextFieldDelegate {
-    
-    private var values: [UITextField: Double] = [:]
-    
-    func getRawValue(for textField: UITextField) -> Double {
-        return values[textField] ?? 0
-    }
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let currentText = textField.text ?? ""
-        let replacementText = (currentText as NSString).replacingCharacters(in: range, with: string)
-        
-        let cleanString = replacementText.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-        
-        if let value = Double(cleanString) {
-        
-            textField.text = rpCurrencyFormatter.string(from: NSNumber(value: value))
-            
-            values[textField] = value
-        } else {
-            textField.text = nil
-            values[textField] = 0
-        }
-        
-        return false
-    }
-}

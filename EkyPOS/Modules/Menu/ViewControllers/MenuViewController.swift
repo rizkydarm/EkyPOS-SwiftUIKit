@@ -77,6 +77,29 @@ extension MenuViewController: SideMenuControllerDelegate {
 }
 
 extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 200
+    }
+
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let view = UIView()
+        view.backgroundColor = .systemGroupedBackground
+
+        let imageLogo = UIImageView()
+        imageLogo.image = UIImage(named: "LaunchIcon")
+        view.addSubview(imageLogo)
+        imageLogo.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.height.equalTo(100)
+        }
+
+        return view
+    }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         60
