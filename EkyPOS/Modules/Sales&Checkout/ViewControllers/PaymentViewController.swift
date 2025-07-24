@@ -121,7 +121,7 @@ class PaymentViewController: UIViewController {
 
         view.addSubview(switchLabel)
         switchLabel.snp.makeConstraints { make in
-            make.leading.equalTo(switchNominal.snp.right).offset(20)
+            make.left.equalTo(switchNominal.snp.right).offset(20)
             make.centerY.equalTo(switchNominal)
         }
 
@@ -139,7 +139,7 @@ class PaymentViewController: UIViewController {
                 self?.nominalTextField.isEnabled = false
             } else {
                 self?.nominalTextField.text = ""
-                self?.nominalTextField.isEnabled = false
+                self?.nominalTextField.isEnabled = true
             }
         }, for: .valueChanged) 
     }
