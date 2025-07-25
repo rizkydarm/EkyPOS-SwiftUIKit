@@ -142,22 +142,22 @@ extension TransactionViewController: UITableViewDelegate, UITableViewDataSource 
         cell.contentView.addSubview(label)
         label.snp.makeConstraints { make in
             make.left.equalToSuperview().inset(20)
-            make.centerY.equalToSuperview()
+            make.centerY.equalToSuperview().multipliedBy(0.8)
         }
-        let subLabel = UILabel()
-        subLabel.textColor = .secondaryLabel
-        subLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        subLabel.text = rpCurrencyFormatter.string(from: transaction.totalPrice as NSNumber)
-        cell.contentView.addSubview(subLabel)
-        subLabel.snp.makeConstraints { make in
-            make.left.equalTo(label.snp.right).offset(10)
-            make.centerY.equalToSuperview()
+        let priceLabel = UILabel()
+        priceLabel.textColor = .secondaryLabel
+        priceLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        priceLabel.text = rpCurrencyFormatter.string(from: transaction.totalPrice as NSNumber)
+        cell.contentView.addSubview(priceLabel)
+        priceLabel.snp.makeConstraints { make in
+            make.left.equalTo(label.snp.left)
+            make.top.equalTo(label.snp.bottom).offset(4)
         }
 
         let timeLabel = UILabel()
         timeLabel.textColor = .secondaryLabel
         timeLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        timeLabel.text = transaction.createdAt.formatted(date: .abbreviated, time: .shortened)
+        timeLabel.text = transaction.createdAt.formattedTimeOnly()
         cell.contentView.addSubview(timeLabel)
         timeLabel.snp.makeConstraints { make in
             make.right.equalToSuperview().inset(20)
