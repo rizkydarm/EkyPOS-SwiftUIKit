@@ -99,7 +99,10 @@ class SalesViewController: UIViewController {
         }
 
         setupBottomBar()
-        
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         loadAllProducts()
     }
     

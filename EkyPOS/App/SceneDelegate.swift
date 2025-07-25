@@ -20,6 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         configureGlobalSideMenuController()
+//        deleteRealmDatabase()
         
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = SideMenuController(

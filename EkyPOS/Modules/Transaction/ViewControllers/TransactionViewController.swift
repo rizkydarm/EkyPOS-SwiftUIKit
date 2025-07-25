@@ -100,7 +100,6 @@ class TransactionViewController: UIViewController {
             return date1 > date2
         }
         
-        // Sort transactions within each section (newest first)
         for (key, _) in groupedTransactions {
             groupedTransactions[key]?.sort { $0.createdAt > $1.createdAt }
         }
@@ -120,21 +119,49 @@ extension TransactionViewController: UITableViewDelegate, UITableViewDataSource 
         let dateString = sectionTitles[section]
         return groupedTransactions[dateString]?.count ?? 0
     }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 30
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80
+    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // let cell = tableView.dequeueReusableCell(withIdentifier: "TransactionCell", for: indexPath) as! TransactionCell
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
+        cell.backgroundColor = .systemBackground
         
-        let dateString = sectionTitles[indexPath.section]
-        if let transaction = groupedTransactions[dateString]?[indexPath.row] {
-            // Configure your cell with transaction data
-            // Example:
-            cell.textLabel?.text = "\(transaction.totalPrice)"
-            
-            // If you want to show time for individual transactions
-            let timeFormatter = DateFormatter()
-            timeFormatter.timeStyle = .short
-            cell.detailTextLabel?.text = timeFormatter.string(from: transaction.createdAt)
+        let transaction = transactions[indexPath.row]
+        
+        let productsname = transaction.products.map { $0.name }.joined(separator: ", ")
+        let label = UILabel()
+        label.textColor = .label
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.text = productsname
+        cell.contentView.addSubview(label)
+        label.snp.makeConstraints { make in
+            make.left.equalToSuperview().inset(20)
+            make.centerY.equalToSuperview()
+        }
+        let subLabel = UILabel()
+        subLabel.textColor = .secondaryLabel
+        subLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        subLabel.text = rpCurrencyFormatter.string(from: transaction.totalPrice as NSNumber)
+        cell.contentView.addSubview(subLabel)
+        subLabel.snp.makeConstraints { make in
+            make.left.equalTo(label.snp.right).offset(10)
+            make.centerY.equalToSuperview()
+        }
+
+        let timeLabel = UILabel()
+        timeLabel.textColor = .secondaryLabel
+        timeLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        timeLabel.text = transaction.createdAt.formatted(date: .abbreviated, time: .shortened)
+        cell.contentView.addSubview(timeLabel)
+        timeLabel.snp.makeConstraints { make in
+            make.right.equalToSuperview().inset(20)
+            make.centerY.equalToSuperview()
         }
         
         return cell
@@ -145,15 +172,16 @@ extension TransactionViewController: UITableViewDelegate, UITableViewDataSource 
     }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        guard let header = view as? UITableViewHeaderFooterView else { return }
+        guard let header: UITableViewHeaderFooterView = view as? UITableViewHeaderFooterView else { return }
         header.textLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         header.textLabel?.textColor = .darkGray
     }
     
-    // Handle row selection
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Handle transaction selection
+        let transaction = transactions[indexPath.row]
+        let vc = TransactionDetailViewController(transaction: transaction)
+        navigationController?.pushViewController(vc, animated: true)
     }
 
 }
