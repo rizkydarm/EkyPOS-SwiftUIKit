@@ -135,6 +135,10 @@ class SalesViewController: UIViewController {
         }, for: .touchUpInside)
     }
 
+    deinit {
+        selectedProducts.removeAll()
+        cartViewModel.resetCart()
+    }
 }
 
 extension SalesViewController: UITableViewDelegate, UITableViewDataSource {
@@ -244,20 +248,20 @@ extension SalesViewController: UIScrollViewDelegate {
     }
 }
 
-#if canImport(SwiftUI)
+#if canImport(SwiftUI) && DEBUG
 import SwiftUI
 
 @available(iOS 17.0, *)
 #Preview("SalesViewController (iOS 17+)") {
     SalesViewController()
 }
-@available(iOS 13.0, *)
-struct SalesViewController_Preview: PreviewProvider {
-    static var previews: some View {
-        UIViewControllerPreview {
-            SalesViewController()
-        }
-        .previewDisplayName("SalesViewController (Legacy)")
-    }
-}
+//@available(iOS 13.0, *)
+//struct SalesViewController_Preview: PreviewProvider {
+//    static var previews: some View {
+//        UIViewControllerPreview {
+//            SalesViewController()
+//        }
+//        .previewDisplayName("SalesViewController (Legacy)")
+//    }
+//}
 #endif

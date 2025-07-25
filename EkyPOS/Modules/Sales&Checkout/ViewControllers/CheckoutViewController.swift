@@ -158,6 +158,10 @@ class CheckoutViewController: UIViewController {
         checkoutModel.totalUnit = units
         totalUnitLabel.text = String(units)
     }
+
+    deinit {
+        cancellables.removeAll()    
+    }
     
 }
 

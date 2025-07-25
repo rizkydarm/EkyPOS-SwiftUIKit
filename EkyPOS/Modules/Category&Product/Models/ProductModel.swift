@@ -19,7 +19,7 @@ class ProductModel: Object {
 
 extension ProductModel {
     static func == (lhs: ProductModel, rhs: ProductModel) -> Bool {
-        return lhs._id == rhs._id // Primary key comparison
+        return lhs._id == rhs._id
     }
 }
 

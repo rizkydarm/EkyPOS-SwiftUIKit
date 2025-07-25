@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import RealmSwift
 
 class InvoiceViewController: UIViewController {
 
     var invoiceModel: InvoiceModel?
+
+    private let transactionRepo = TransactionRepo()
     
     private let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
@@ -36,10 +39,14 @@ class InvoiceViewController: UIViewController {
         button.backgroundColor = .systemGray
         button.tintColor = .label
         button.layer.cornerRadius = 8
-        let icon = UIImage(systemName: "printer")
+        let icon = UIImage(systemName: "printer.fill")
         button.setImage(icon, for: .normal)
         button.semanticContentAttribute = .forceLeftToRight
         button.contentHorizontalAlignment = .center
+        button.translatesAutoresizingMaskIntoConstraints = false
+        var configuration = UIButton.Configuration.plain()
+        configuration.imagePadding = 16
+        button.configuration = configuration
         button.enableBounceAnimation()
         return button
     }()
@@ -86,14 +93,25 @@ class InvoiceViewController: UIViewController {
             make.height.equalTo(60)
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalTo(doneButton.snp.top).offset(-20)
+            make.top.equalTo(bottomBar.snp.top).offset(20)
         }
 
         printButton.addAction(UIAction { _ in
             
         }, for: .touchUpInside)
 
-        doneButton.addAction(UIAction { _ in
-            
+        doneButton.addAction(UIAction { [weak self] _ in
+            guard let invoiceModel = self?.invoiceModel else { return }
+            let productList = List<ProductModel>()
+            productList.append(objectsIn: invoiceModel.checkout.cartProducts.map { $0.product })
+            self?.transactionRepo.addTransaction(
+                totalPrice: invoiceModel.checkout.totalPrice,
+                totalUnit: invoiceModel.checkout.totalUnit, 
+                changes: invoiceModel.changes, 
+                paymentMethod: invoiceModel.paymentMethod,
+                products: productList
+            )
+            self?.navigationController?.setViewControllers([SalesViewController()], animated: true)
         }, for: .touchUpInside)
     }
 }
@@ -235,5 +253,3 @@ extension InvoiceViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
 }
-
-

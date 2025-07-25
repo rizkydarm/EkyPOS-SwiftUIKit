@@ -56,4 +56,11 @@ class CartViewModel {
             cartProductSubject.send(cartProducts)
         }
     }
+
+    func resetCart() {
+        if !cartProducts.isEmpty {
+            cartProducts.removeAll()
+            cartProductSubject.send(cartProducts)
+        }
+    }
 }

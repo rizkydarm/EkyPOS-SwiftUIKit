@@ -19,7 +19,8 @@ class PaymentViewController: UIViewController {
         return label
     }()
     
-    private let segmentControl: UISegmentedControl = {
+    private var paymentMethod: String = "Cash"
+    private let paymentSegmentControl: UISegmentedControl = {
         let control = UISegmentedControl()
         control.insertSegment(withTitle: "Cash", at: 0, animated: true)
         control.insertSegment(withTitle: "QRIS", at: 1, animated: true)
@@ -52,6 +53,7 @@ class PaymentViewController: UIViewController {
         return button
     }()
 
+    
     private let switchNominal: UISwitch = {
         let control = UISwitch()
         control.onTintColor = .systemBrown
@@ -86,8 +88,8 @@ class PaymentViewController: UIViewController {
             make.centerX.equalToSuperview()
         }
         
-        view.addSubview(segmentControl)
-        segmentControl.snp.makeConstraints { make in
+        view.addSubview(paymentSegmentControl)
+        paymentSegmentControl.snp.makeConstraints { make in
             make.top.equalTo(amountLabel.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
             make.width.equalToSuperview().inset(20)
@@ -101,7 +103,7 @@ class PaymentViewController: UIViewController {
 
         view.addSubview(nominalLabel)
         nominalLabel.snp.makeConstraints { make in
-            make.top.equalTo(segmentControl.snp.bottom).offset(20)
+            make.top.equalTo(paymentSegmentControl.snp.bottom).offset(20)
             make.leading.equalToSuperview().inset(20)
         }
 
@@ -140,12 +142,17 @@ class PaymentViewController: UIViewController {
             make.height.equalTo(60)
         }
 
+        paymentSegmentControl.addAction(UIAction { [weak self] _ in
+            guard let self = self else { return }
+            self.paymentMethod = self.paymentSegmentControl.titleForSegment(at: self.paymentSegmentControl.selectedSegmentIndex) ?? "Cash"
+        }, for: .valueChanged)
+
         actionButton.addAction(UIAction { [weak self] _ in
             guard let self = self else { return }
             if self.switchNominal.isOn == true {
                 let invoiceVC = InvoiceViewController()
                 if let checkoutModel = self.checkoutModel {
-                    invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel)
+                    invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel, paymentMethod: "Cash")
                 }
                 self.navigationController?.pushViewController(invoiceVC, animated: true)
             } else {
@@ -157,7 +164,7 @@ class PaymentViewController: UIViewController {
                     let invoiceVC = InvoiceViewController()
                     if let checkoutModel = self.checkoutModel {
                         let changes = self.nominalValue - totalPrice
-                        invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel, changes: changes)
+                        invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel, paymentMethod: "Cash", changes: changes)
                     }
                     self.navigationController?.pushViewController(invoiceVC, animated: true)
                 }
