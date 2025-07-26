@@ -1,0 +1,33 @@
+
+
+workflows:
+  ios-native-workflow:
+    name: iOS Native
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: rizkyeky.EkyPOS
+      vars:
+        BUNDLE_ID: "rizkyeky.EkyPOS"
+        XCODE_WORKSPACE: "EkyPOS.xcworkspace" # <-- Put the name of your Xcode workspace here
+        XCODE_SCHEME: "EkyPOS" # <-- Put the name of your Xcode scheme here
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install CocoaPods dependencies
+        script: | 
+          pod install
+      - name: Build ipa for distribution
+        script: | 
+          xcode-project build-ipa \
+            --workspace "$CM_BUILD_DIR/$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
