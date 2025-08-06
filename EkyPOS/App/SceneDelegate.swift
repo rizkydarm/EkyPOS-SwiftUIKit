@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = SideMenuController(
-            contentViewController: UINavigationController(rootViewController: SalesViewController()),
+            contentViewController: UINavigationController(rootViewController: MainSplitViewController()),
             menuViewController: MenuViewController())
         window?.makeKeyAndVisible()
     }

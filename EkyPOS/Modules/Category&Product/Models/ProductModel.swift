@@ -10,11 +10,12 @@ import RealmSwift
 class ProductModel: Object {
     @Persisted(primaryKey: true) var _id: String = UUID().uuidString
     @Persisted var createdAt: Date = Date()
-    @Persisted var category: CategoryModel?
-    @Persisted var name: String
+    @Persisted var updatedAt: Date = Date()
+    @Persisted var name: String = ""
     @Persisted var desc: String = ""
-    @Persisted var price: Double
+    @Persisted var price: Double = 0.0
     @Persisted var image: String = ""
+    @Persisted var category: CategoryModel?
 }
 
 extension ProductModel {

@@ -11,6 +11,15 @@ target 'EkyPOS' do
   # https://github.com/groue/GRDB.swift
   # https://github.com/stephencelis/SQLite.swift
   pod 'SideMenuSwift', :git => 'https://github.com/kukushi/SideMenu.git'
+  pod 'AwaitToast', :git => 'https://github.com/k-lpmg/AwaitToast.git'
+  # https://github.com/devxoul/Toaster
+  # https://github.com/Daltron/NotificationBanner
+
+  # https://github.com/joomcode/BottomSheet
+  # https://github.com/SCENEE/FloatingPanel
+
+  # https://github.com/marcosgriselli/ViewAnimator
+  # https://github.com/HeroTransitions/Hero
 end
 
 post_install do |installer|

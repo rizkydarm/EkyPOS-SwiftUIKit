@@ -8,102 +8,154 @@
 import RealmSwift
 
 class ProductRepo {
-    private var realm: Realm?
     
-    init() {
-        do {
-            realm = try Realm()
-        } catch {
-            print("Realm initialization error: \(error.localizedDescription)")
-        }
-    }
+    let realmManager = RealmManager.shared
     
     func addProduct(
         name: String,
         description: String,
         price: Double,
         image: String,
-        category: CategoryModel
+        category: CategoryModel,
+        completion: @escaping (Result<Void, RepositoryError>) -> Void
     ) {
-        guard let realm = realm else { return }
-        
-        do {
-            try realm.write {
-                let newProduct = ProductModel()
-                newProduct.name = name
-                newProduct.desc = description
-                newProduct.price = price
-                newProduct.image = image
-                newProduct.category = category
-                realm.add(newProduct)
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                do {
+                    try realm.write {
+                        let newProduct = ProductModel()
+                        newProduct.name = name
+                        newProduct.desc = description
+                        newProduct.price = price
+                        newProduct.image = image
+                        newProduct.category = category
+                        realm.add(newProduct)
+                        completion(.success(()))
+                    }
+                } catch {
+                    completion(.failure(.realmWriteFailed(error)))
+                }
+            case .failure(let error):
+                completion(.failure(error))
             }
-        } catch {
-            print("Add product failed: \(error.localizedDescription)")
         }
     }
     
-    func getAllProducts() -> [ProductModel] {
-        guard let realm = realm else { return [] }
-        return Array(realm.objects(ProductModel.self).sorted(byKeyPath: "name"))
+    func getAllProducts(completion: @escaping (Result<[ProductModel], RepositoryError>) -> Void) {
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                let products = realm.objects(ProductModel.self).sorted(byKeyPath: "name")
+                completion(.success(Array(products)))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
-    func getProducts(byCategory category: CategoryModel) -> [ProductModel] {
-        guard let realm = realm else { return [] }
-        return Array(realm.objects(ProductModel.self)
-            .filter("category._id == %@", category._id)
-            .sorted(byKeyPath: "name"))
+    func getProducts(byCategory category: CategoryModel, completion: @escaping (Result<[ProductModel], RepositoryError>) -> Void) {
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                let products = realm.objects(ProductModel.self)
+                    .filter("category._id == %@", category._id)
+                    .sorted(byKeyPath: "name")
+                completion(.success(Array(products)))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     func updateProduct(
         id: String,
         newName: String? = nil,
-        newDescription: String? = nil,
+        newDesc: String? = nil,
         newPrice: Double? = nil,
         newImage: String? = nil,
-        newCategory: CategoryModel? = nil
+        newCategory: CategoryModel? = nil,
+        completion: @escaping (Result<Void, RepositoryError>) -> Void
     ) {
-        guard let realm = realm else { return }
-        
-        if let product = realm.object(ofType: ProductModel.self, forPrimaryKey: id) {
-            do {
-                try realm.write {
-                    if let newName = newName { product.name = newName }
-                    if let newDescription = newDescription { product.desc = newDescription }
-                    if let newPrice = newPrice { product.price = newPrice }
-                    if let newImage = newImage { product.image = newImage }
-                    if let newCategory = newCategory { product.category = newCategory }
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                if let product = realm.object(ofType: ProductModel.self, forPrimaryKey: id) {
+                    do {
+                        try realm.write {
+                            if let newName = newName { product.name = newName }
+                            if let newDesc = newDesc { product.desc = newDesc }
+                            if let newPrice = newPrice { product.price = newPrice }
+                            if let newImage = newImage, newImage != product.image { product.image = newImage }
+                            if let newCategory = newCategory { product.category = newCategory }
+                        }
+                        completion(.success(()))
+                    } catch {
+                        completion(.failure(.realmWriteFailed(error)))
+                    }
+                } else {
+                    completion(.failure(.objectNotFound(id)))
                 }
-            } catch {
-                print("Update failed: \(error.localizedDescription)")
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
     
-    func deleteProduct(id: String) {
-        guard let realm = realm else { return }
-        
-        if let product = realm.object(ofType: ProductModel.self, forPrimaryKey: id) {
-            do {
-                try realm.write {
-                    realm.delete(product)
+    func deleteProduct(id: String, completion: @escaping (Result<Void, RepositoryError>) -> Void) {
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                if let product = realm.object(ofType: ProductModel.self, forPrimaryKey: id) {
+                    do {
+                        try realm.write {
+                            realm.delete(product)
+                        }
+                        completion(.success(()))
+                    } catch {
+                        completion(.failure(.realmWriteFailed(error)))
+                    }
+                } else {
+                    completion(.failure(.objectNotFound(id)))
                 }
-            } catch {
-                print("Deletion failed: \(error.localizedDescription)")
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
     
-    func searchProducts(name: String) -> [ProductModel] {
-        guard let realm = realm else { return [] }
-        return Array(realm.objects(ProductModel.self)
-            .filter("name CONTAINS[c] %@", name)
-            .sorted(byKeyPath: "name"))
+    func searchProducts(name: String, completion: @escaping (Result<[ProductModel], RepositoryError>) -> Void) {
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                let products = realm.objects(ProductModel.self)
+                    .filter("name CONTAINS[c] %@", name)
+                    .sorted(byKeyPath: "name")
+                completion(.success(Array(products)))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
-    func getProductsInPriceRange(min: Double, max: Double) -> [ProductModel] {
-        guard let realm = realm else { return [] }
-        return Array(realm.objects(ProductModel.self)
-            .filter("price BETWEEN {%@, %@}", min, max)
-            .sorted(byKeyPath: "price"))
+    func getProductsInPriceRange(min: Double, max: Double, completion: @escaping (Result<[ProductModel], RepositoryError>) -> Void) {
+        realmManager.setup { [weak self] result in
+            guard let _ = self else { return }
+            switch result {
+            case .success(let realm):
+                let products = realm.objects(ProductModel.self)
+                    .filter("price BETWEEN {%@, %@}", min, max)
+                    .sorted(byKeyPath: "price")
+                completion(.success(Array(products)))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
 }

@@ -43,11 +43,11 @@ enum ToastType {
 }
 
 func showToast(_ type: ToastType, vc: UIViewController, message: String, seconds: Double = 3) {
-    let alert = UIAlertController(title: type.title, message: message, preferredStyle: .actionSheet)
+    let alert: UIAlertController = UIAlertController(title: type.title, message: message, preferredStyle: .alert)
     
-    alert.view.backgroundColor = type.color
-    alert.view.layer.cornerRadius = 16
-    alert.view.layer.masksToBounds = true
+    // alert.view.backgroundColor = type.color
+    // alert.view.layer.cornerRadius = 16
+    // alert.view.layer.masksToBounds = true
     
     vc.present(alert, animated: true)
     

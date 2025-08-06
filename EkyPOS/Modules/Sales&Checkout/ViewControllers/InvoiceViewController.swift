@@ -110,8 +110,15 @@ class InvoiceViewController: UIViewController {
                 changes: invoiceModel.changes, 
                 paymentMethod: invoiceModel.paymentMethod,
                 products: productList
-            )
-            self?.navigationController?.setViewControllers([SalesViewController()], animated: true)
+            ) { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success():
+                    self.navigationController?.setViewControllers([SalesViewController()], animated: true)
+                case .failure(let error):
+                    showToast(.error, vc: self, message: error.localizedDescription)
+                }
+            }
         }, for: .touchUpInside)
     }
 }

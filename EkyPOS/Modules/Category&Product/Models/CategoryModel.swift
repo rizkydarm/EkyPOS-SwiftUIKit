@@ -9,7 +9,8 @@ import RealmSwift
 
 class CategoryModel: Object {
     @Persisted(primaryKey: true) var _id: String = UUID().uuidString
-    @Persisted var name: String
-    @Persisted var image: String
     @Persisted var createdAt: Date = Date()
+    @Persisted var updatedAt: Date = Date()
+    @Persisted var name: String = ""
+    @Persisted var image: String = ""
 }

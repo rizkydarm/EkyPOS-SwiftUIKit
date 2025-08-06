@@ -5,10 +5,7 @@
 //  Created by Eky on 05/08/25.
 //
 
-
-enum RepoError: Error {
-    case realmNotInitialized
-}
+import RealmSwift
 
 extension Results {
     func toArray() -> [Element] {

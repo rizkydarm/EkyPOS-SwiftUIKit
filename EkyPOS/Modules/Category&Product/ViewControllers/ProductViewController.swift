@@ -22,13 +22,13 @@ class ProductViewController: UIViewController {
     private let productRepo = ProductRepo()
     private var products: [ProductModel] = []
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
     }()
     
-    private let emptyLabel: UILabel = {
+    private lazy var emptyLabel: UILabel = {
         let label = UILabel()
         label.text = "No product"
         label.textColor = .secondaryLabel
@@ -51,8 +51,15 @@ class ProductViewController: UIViewController {
                 let vc = AddProductViewController()
                 vc.didInputComplete = { [weak self] (name, image, price, desc) in
                     guard let self = self else { return }
-                    self.productRepo.addProduct(name: name, description: desc, price: price, image: image, category: category)
-                    self.loadProducts()
+                    self.productRepo.addProduct(name: name, description: desc, price: price, image: image, category: category) { [weak self] result in
+                        guard let self = self else { return }
+                        switch result {
+                        case .success():
+                            self.loadProducts()
+                        case .failure(let error):
+                            showToast(.error, vc: self, message: error.localizedDescription)
+                        }
+                    }
                 }
                 vc.modalPresentationStyle = .pageSheet
                 self?.present(vc, animated: true)
@@ -79,9 +86,17 @@ class ProductViewController: UIViewController {
     }
     
     private func loadProducts() {
-        products = productRepo.getProducts(byCategory: category)
-        tableView.reloadData()
-        emptyLabel.isHidden = !products.isEmpty
+        productRepo.getProducts(byCategory: category) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let products):
+                self.products = products
+                self.tableView.reloadData()
+                self.emptyLabel.isHidden = !self.products.isEmpty
+            case .failure(let error):
+                showToast(.error, vc: self, message: error.localizedDescription)
+            }
+        }
     }
 
 }
@@ -134,9 +149,20 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
                     
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (_, _, completion) in
             guard let self = self else { return }
-            self.deleteProduct(at: indexPath)
-            self.loadProducts()
-            completion(true)
+            let product = products[indexPath.row]
+            self.productRepo.deleteProduct(id: product._id) { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success():
+                    completion(true)
+                    products.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .automatic)
+                    self.loadProducts()
+                case .failure(let error):
+                    completion(false)
+                    showToast(.error, vc: self, message: error.localizedDescription)
+                }
+            }
         }
         deleteAction.backgroundColor = .systemRed
         deleteAction.image = UIImage(systemName: "trash")
@@ -148,27 +174,24 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
             vc.editingMode = (selectedProduct.name, selectedProduct.image, selectedProduct.price, selectedProduct.desc)
             vc.didInputComplete = { [weak self] (text, image, price, desc) in
                 guard let self = self else { return }
-                self.editProduct(at: indexPath, newName: text, newImage: image, newPrice: price, newDesc: desc)
-                self.loadProducts()
+                let product = products[indexPath.row]
+                productRepo.updateProduct(id: product._id, newName: text, newDesc: desc, newPrice: price, newImage: image) { [weak self] result in
+                    guard let self = self else { return }
+                    switch result {
+                    case .success():
+                        completion(true)
+                        self.loadProducts()
+                    case .failure(let error):
+                        completion(false)
+                        showToast(.error, vc: self, message: error.localizedDescription)
+                    }
+                }
             }
             self.present(vc, animated: true)
-            completion(true)
         }
         editAction.backgroundColor = .systemBlue
         editAction.image = UIImage(systemName: "pencil")
         
         return UISwipeActionsConfiguration(actions: [deleteAction, editAction])
-    }
-    
-    private func deleteProduct(at indexPath: IndexPath) {
-        let product = products[indexPath.row]
-        productRepo.deleteProduct(id: product._id)
-        products.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .automatic)
-    }
-    private func editProduct(at indexPath: IndexPath, newName: String, newImage: String, newPrice: Double, newDesc: String) {
-        let product = products[indexPath.row]
-        productRepo.updateProduct(id: product._id, newName: newName, newDescription: newDesc, newPrice: newPrice, newImage: newImage)
-        products.remove(at: indexPath.row)
     }
 }

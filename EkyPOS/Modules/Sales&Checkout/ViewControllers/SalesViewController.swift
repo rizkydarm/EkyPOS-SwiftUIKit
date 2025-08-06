@@ -13,18 +13,18 @@ class SalesViewController: UIViewController {
     private let productRepo = ProductRepo()
     private var products: [ProductModel] = []
     
-    private let cartViewModel = CartViewModel.shared
+    private lazy var cartViewModel = CartViewModel.shared
     
     private var selectedProducts: Set<ProductModel> = []
 
-    private let searchController = UISearchController(searchResultsController: nil)
-    private let tableView: UITableView = {
+    private lazy var searchController = UISearchController(searchResultsController: nil)
+    private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
     }()
 
-    private let emptyLabel: UILabel = {
+    private lazy var emptyLabel: UILabel = {
         let label = UILabel()
         label.text = "No product"
         label.textColor = .secondaryLabel
@@ -34,7 +34,7 @@ class SalesViewController: UIViewController {
         return label
     }()
     
-    private let bottomBar: UIView = {
+    private lazy var bottomBar: UIView = {
         let view = UIView()
         view.backgroundColor = .systemBackground
         let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
@@ -46,7 +46,7 @@ class SalesViewController: UIViewController {
         return view
     }()
         
-    private let actionButton: UIButton = {
+    private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Checkout", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
@@ -107,9 +107,17 @@ class SalesViewController: UIViewController {
     }
     
     private func loadAllProducts() {
-        products = productRepo.getAllProducts()
-        tableView.reloadData()
-        emptyLabel.isHidden = !products.isEmpty
+        productRepo.getAllProducts() { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let products):
+                self.products = products
+                self.tableView.reloadData()
+                self.emptyLabel.isHidden = !products.isEmpty
+            case .failure(let error):
+                showToast(.error, vc: self, message: error.localizedDescription)
+            }
+        }
     }
     
     private func setupBottomBar() {
@@ -232,8 +240,17 @@ extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
             loadAllProducts()
             return
         }
-        products = productRepo.searchProducts(name: searchText)
-        tableView.reloadData()
+        productRepo.searchProducts(name: searchText) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let products):
+                self.products = products
+                self.tableView.reloadData()
+                self.emptyLabel.isHidden = !products.isEmpty
+            case .failure(let error):
+                showToast(.error, vc: self, message: error.localizedDescription)
+            }
+        }
     }
 }
 

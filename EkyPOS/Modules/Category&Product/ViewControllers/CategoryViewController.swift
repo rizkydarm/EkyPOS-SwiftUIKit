@@ -13,10 +13,19 @@ class CategoryViewController: UIViewController {
     private let categoryRepo = CategoryRepo()
     private var categories: [CategoryModel] = []
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
+    }()
+
+    private lazy var emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No category"
+        label.textColor = .secondaryLabel
+        label.font = .systemFont(ofSize: 16, weight: .regular)
+        label.textAlignment = .center
+        return label
     }()
     
     override func viewDidLoad() {
@@ -34,14 +43,21 @@ class CategoryViewController: UIViewController {
         )
         navigationItem.leftBarButtonItem = menuButton
         let addButton = UIBarButtonItem(
+            title: "Add category",
             image: UIImage(systemName: "plus.circle.fill")?.withConfiguration(config),
             primaryAction: UIAction { [weak self] _ in
                 guard let self = self else { return }
                 let vc = AddCategoryViewController()
                 vc.didInputComplete = { [weak self] (text, image) in
                     guard let self = self else { return }
-                    self.categoryRepo.addCategory(name: text, image: image)
-                    self.loadCategories()
+                    self.categoryRepo.addCategory(name: text, image: image, completion: { result in
+                        switch result {
+                        case .success():
+                            self.loadCategories()
+                        case .failure(let error):
+                            showToast(.error, vc: self, message: error.localizedDescription)
+                        }
+                    })
                 }
                 vc.modalPresentationStyle = .pageSheet
                 self.present(vc, animated: true)
@@ -59,12 +75,26 @@ class CategoryViewController: UIViewController {
             make.edges.equalToSuperview()
         }
         
+        view.addSubview(emptyLabel)
+        emptyLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
         loadCategories()
     }
     
     private func loadCategories() {
-        categories = categoryRepo.getAllCategories()
-        tableView.reloadData()
+        categoryRepo.getAllCategories { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let categories):
+                self.categories = categories
+                self.tableView.reloadData()
+                self.emptyLabel.isHidden = !self.categories.isEmpty
+            case .failure(let error):
+                showToast(.error, vc: self, message: error.localizedDescription)
+            }
+        }
     }
 
 }
@@ -119,8 +149,20 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
                     
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (_, _, completion) in
             guard let self = self else { return }
-            self.deleteCategory(at: indexPath)
-            completion(true)
+            let category = categories[indexPath.row]
+            categoryRepo.deleteCategory(id: category._id) { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success():
+                    completion(true)
+                    categories.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .automatic)
+                    self.loadCategories()
+                case .failure(let error):
+                    completion(false)
+                    showToast(.error, vc: self, message: error.localizedDescription)
+                }
+            }
         }
         deleteAction.backgroundColor = .systemRed
         deleteAction.image = UIImage(systemName: "trash")
@@ -132,28 +174,25 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
             vc.editingMode = (selectedCategory.name, selectedCategory.image)
             vc.didInputComplete = { [weak self] (text, image) in
                 guard let self = self else { return }
-                self.editCategory(at: indexPath, newName: text, newImage: image)
-                self.loadCategories()
+                let category = categories[indexPath.row]
+                categoryRepo.updateCategory(id: category._id, newName: text, newImage: image) { [weak self] result in
+                    guard let self = self else { return }
+                    switch result {
+                    case .success():
+                        completion(true)
+                        self.loadCategories()
+                    case .failure(let error):
+                        completion(false)
+                        showToast(.error, vc: self, message: error.localizedDescription)
+                    }
+                }
             }
             self.present(vc, animated: true)
-            completion(true)
         }
         editAction.backgroundColor = .systemBlue
         editAction.image = UIImage(systemName: "pencil")
         
         return UISwipeActionsConfiguration(actions: [deleteAction, editAction])
-    }
-    
-    private func deleteCategory(at indexPath: IndexPath) {
-        let category = categories[indexPath.row]
-        categoryRepo.deleteCategory(id: category._id)
-        categories.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .automatic)
-    }
-    private func editCategory(at indexPath: IndexPath, newName: String, newImage: String?) {
-        let category = categories[indexPath.row]
-        categoryRepo.updateCategory(id: category._id, newName: newName, newImage: newImage)
-        categories.remove(at: indexPath.row)
     }
 }
 

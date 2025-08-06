@@ -9,9 +9,9 @@ import UIKit
 
 class AddProductViewController: UIViewController {
     
-    private let navigationBar = UINavigationBar(frame: .zero, color: .clear)
+    private lazy var navigationBar = UINavigationBar(frame: .zero, color: .clear)
     
-    private let inputTextField: UITextField = {
+    private lazy var inputTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Product name"
         tf.borderStyle = .roundedRect
@@ -21,7 +21,7 @@ class AddProductViewController: UIViewController {
         return tf
     }()
     
-    private let imageTextField: UITextField = {
+    private lazy var imageTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Image emoji"
         tf.borderStyle = .roundedRect
@@ -31,7 +31,7 @@ class AddProductViewController: UIViewController {
         return tf
     }()
     
-    private let priceTextField: UITextField = {
+    private lazy var priceTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Price"
         tf.borderStyle = .roundedRect
@@ -41,7 +41,7 @@ class AddProductViewController: UIViewController {
         return tf
     }()
 
-    private let descTextField: UITextField = {
+    private lazy var descTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Description"
         tf.borderStyle = .roundedRect
@@ -54,7 +54,7 @@ class AddProductViewController: UIViewController {
     var didInputComplete: ((String, String, Double, String) -> Void)?
     var editingMode: (oldName: String, oldImage: String, oldPrice: Double, oldDesc: String)?
     
-    private let currencyTextFieldDelegate = CurrencyTextFieldDelegate()
+    private lazy var currencyTextFieldDelegate = CurrencyTextFieldDelegate()
 
     override func viewDidLoad() {
         super.viewDidLoad()

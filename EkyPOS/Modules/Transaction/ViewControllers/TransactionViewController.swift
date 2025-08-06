@@ -15,13 +15,13 @@ class TransactionViewController: UIViewController {
     private var groupedTransactions: [String: [TransactionModel]] = [:]
     private var sectionTitles: [String] = []
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
     }()
 
-    private let emptyLabel: UILabel = {
+    private lazy var emptyLabel: UILabel = {
         let label = UILabel()
         label.text = "No transaction"
         label.textColor = .secondaryLabel
@@ -64,9 +64,17 @@ class TransactionViewController: UIViewController {
     }
 
     private func loadAllTransactions() {
-        transactions = transactionRepo.getAllTransactions()
-        tableView.reloadData()
-        emptyLabel.isHidden = !transactions.isEmpty
+        transactionRepo.getAllTransactions { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let transactions):
+                self.transactions = transactions
+                self.tableView.reloadData()
+                self.emptyLabel.isHidden = !self.transactions.isEmpty
+            case .failure(let error):
+                showToast(.error, vc: self, message: error.localizedDescription)
+            }
+        }
     }
 
     private func groupTransactionsByDate() {

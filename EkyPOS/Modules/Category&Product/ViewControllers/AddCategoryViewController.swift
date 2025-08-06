@@ -9,9 +9,9 @@ import UIKit
 
 class AddCategoryViewController: UIViewController {
     
-    private let navigationBar = UINavigationBar(frame: .zero, color: .clear)
+    private lazy var navigationBar = UINavigationBar(frame: .zero, color: .clear)
     
-    private let inputTextField: UITextField = {
+    private lazy var inputTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Category"
         tf.borderStyle = .roundedRect
@@ -21,7 +21,7 @@ class AddCategoryViewController: UIViewController {
         return tf
     }()
     
-    private let imageTextField: UITextField = {
+    private lazy var imageTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Image emoji"
         tf.borderStyle = .roundedRect
@@ -30,7 +30,6 @@ class AddCategoryViewController: UIViewController {
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
-
     
     var didInputComplete: ((String, String) -> Void)?
     var editingMode: (oldName: String, oldImage: String?)?
