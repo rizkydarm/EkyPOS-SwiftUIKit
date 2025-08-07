@@ -15,7 +15,9 @@ class CartViewModel {
     private let cartProductSubject = CurrentValueSubject<[CartProductModel], Never>([])
     var cartProducts: [CartProductModel] {
         get { cartProductSubject.value }
-        set { cartProductSubject.send(newValue) }
+        set { 
+            cartProductSubject.send(newValue) 
+        }
     }
 
     var cartProductsPublisher: AnyPublisher<[CartProductModel], Never> {
@@ -25,13 +27,13 @@ class CartViewModel {
     private func addCartProduct(_ product: ProductModel) {
         let cartProduct = CartProductModel(product: product, total: 1)
         cartProducts.append(cartProduct)
-        cartProductSubject.send(cartProducts)
+        // cartProductSubject.send(cartProducts)
     }
     
     private func removeCartProduct(_ product: ProductModel) {
         if let index = cartProducts.firstIndex(where: { $0.product == product }) {
             cartProducts.remove(at: index)
-            cartProductSubject.send(cartProducts)
+            // cartProductSubject.send(cartProducts)
         }
     }
     

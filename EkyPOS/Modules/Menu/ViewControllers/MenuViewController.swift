@@ -55,17 +55,12 @@ class MenuViewController: UIViewController {
         salesNavContro.navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
         
         salesNavContro.navigationBar.tintColor = .label
-        salesNavContro.navigationBar.isTranslucent = true
         
         sideMenuController?.cache(viewController: salesNavContro, with: "0")
         sideMenuController?.cache(viewController: categoryproductNavContro, with: "1")
         sideMenuController?.cache(viewController: transactionNavContro, with: "2")
         
         sideMenuController?.delegate = self
-    }
-    
-    private func configureGlobalNavigationBarAppearance() {
-        
     }
     
 }

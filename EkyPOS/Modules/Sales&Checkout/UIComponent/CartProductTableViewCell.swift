@@ -7,45 +7,47 @@ class CartProductTableViewCell: UITableViewCell {
     
     private var cartProduct: CartProductModel?
 
-    private let cartViewModel = CartViewModel.shared
     private var cancellables = Set<AnyCancellable>()
 
-    private let emoji: UILabel = {
+    private let cartCellViewModel = CartCellViewModel()
+    private let cartViewModel = CartViewModel.shared
+
+    private lazy var emoji: UILabel = {
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 24, weight: .bold)
         return label
     }()
         
-    private let title: UILabel = {
+    private lazy var title: UILabel = {
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
         return label
     }()
     
-    private let subtitle: UILabel = {
+    private lazy var subtitle: UILabel = {
         let label = UILabel()
         label.textColor = .secondaryLabel
         label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()        
 
-    private let incrementButton: UIButton = {
+    private lazy var incrementButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
         button.tintColor = .systemGreen
         return button
     }()
 
-    private let unitLabel: UILabel = {
+    private lazy var unitLabel: UILabel = {
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
         return label
     }()
 
-    private let decrementButton: UIButton = {
+    private lazy var decrementButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "minus.circle.fill"), for: .normal)
         button.tintColor = .systemRed
@@ -54,6 +56,8 @@ class CartProductTableViewCell: UITableViewCell {
     
     func configure(with cartProduct: CartProductModel) {
         self.cartProduct = cartProduct
+
+        print("configure cell with product: \(cartProduct.product.name)")
 
         emoji.text = cartProduct.product.image.containsEmoji ? cartProduct.product.image : "🟤"
         contentView.addSubview(emoji)
@@ -95,33 +99,54 @@ class CartProductTableViewCell: UITableViewCell {
             make.centerY.equalToSuperview()
         }
         decrementButton.isEnabled = cartProduct.total > 1
-
-        cartViewModel.cartProductsPublisher
-            .receive(on: RunLoop.main)
-            .map { cartProducts in
-                cartProducts.first { $0.product == self.cartProduct?.product }?.total ?? 0
-            }
-            .removeDuplicates()
-            .sink { [weak self] total in
-                self?.unitLabel.text = String(total)
-                self?.decrementButton.isEnabled = total > 1
-            }
-            .store(in: &cancellables)
         
         decrementButton.addAction(UIAction { [weak self] _ in
-            guard let cartProduct = self?.cartProduct else { return }
-            self?.cartViewModel.decrementQuantity(for: cartProduct.product)
+            Debouncer.debounce(identifier: "decrementQuantity_\(self.hashValue)", action: {
+                self?.cartCellViewModel.decrementQuantity()
+                self?.cartViewModel.decrementQuantity(for: cartProduct.product)
+            })
         }, for: .touchUpInside)
         
         incrementButton.addAction(UIAction { [weak self] _ in
-            guard let cartProduct = self?.cartProduct else { return }
-            self?.cartViewModel.incrementQuantity(for: cartProduct.product)
+            Debouncer.debounce(identifier: "incrementQuantity_\(self.hashValue)", action: {
+                self?.cartCellViewModel.incrementQuantity()
+                self?.cartViewModel.incrementQuantity(for: cartProduct.product)
+            })
         }, for: .touchUpInside)
+
+        setupBindings()
+    }
+
+    private func setupBindings() {
+        cartCellViewModel.number = cartProduct?.total ?? 0
+        cartCellViewModel.$number
+            .receive(on: RunLoop.main)
+            .sink { [weak self] total in
+                self?.unitLabel.text = String(total)
+                self?.cartProduct?.total = total
+                self?.decrementButton.isEnabled = total > 1
+            }
+            .store(in: &cancellables)
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         cancellables.removeAll()
         cartProduct = nil
+        cartCellViewModel.number = 0
+    }
+}
+
+class CartCellViewModel {
+    @Published var number: Int = 0
+
+    func incrementQuantity() {
+        number += 1
+    }
+    
+    func decrementQuantity() {
+        if number > 1 {
+            number -= 1
+        }
     }
 }

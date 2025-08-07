@@ -13,13 +13,13 @@ class CheckoutViewController: UIViewController {
     private let cartViewModel = CartViewModel.shared
     private var cancellables = Set<AnyCancellable>()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
     }()
 
-    private let bottomBar: UIView = {
+    private lazy var bottomBar: UIView = {
         let view = UIView()
         view.backgroundColor = .systemBackground
         let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
@@ -31,7 +31,7 @@ class CheckoutViewController: UIViewController {
         return view
     }()
 
-    private let actionButton: UIButton = {
+    private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Pay", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
@@ -42,7 +42,7 @@ class CheckoutViewController: UIViewController {
         return button
     }()
 
-    let totalPriceLabel: UILabel = {
+    private lazy var totalPriceLabel: UILabel = {
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
@@ -50,7 +50,7 @@ class CheckoutViewController: UIViewController {
         return label
     }()
     
-    let totalUnitLabel: UILabel = {
+    private lazy var totalUnitLabel: UILabel = {
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
@@ -59,6 +59,7 @@ class CheckoutViewController: UIViewController {
     }()
 
     private var checkoutModel = CheckoutModel(cartProducts: [], totalPrice: 0, totalUnit: 0)
+    private var cartProductsTotalTemp: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -140,9 +141,15 @@ class CheckoutViewController: UIViewController {
         cartViewModel.cartProductsPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] cartProducts in
-                self?.updateTotalPrice(cartProducts: cartProducts)
-                self?.updateTotalUnit(cartProducts: cartProducts)
-                self?.checkoutModel.cartProducts = cartProducts
+                guard let self = self else { return }
+                self.updateTotalPrice(cartProducts: cartProducts)
+                self.updateTotalUnit(cartProducts: cartProducts)
+                self.checkoutModel.cartProducts = cartProducts
+                
+                if UIDevice.current.userInterfaceIdiom == .pad && self.cartProductsTotalTemp != cartProducts.count {
+                    self.cartProductsTotalTemp = cartProducts.count
+                    self.tableView.reloadData()
+                }
             }
             .store(in: &cancellables)
     }

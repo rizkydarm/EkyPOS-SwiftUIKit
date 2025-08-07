@@ -23,9 +23,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        deleteRealmDatabase()
         
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = SideMenuController(
-            contentViewController: UINavigationController(rootViewController: MainSplitViewController()),
-            menuViewController: MenuViewController())
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            window?.rootViewController = SalesCheckoutSplitViewController()
+        } else {
+            window?.rootViewController = SideMenuController(
+                contentViewController: UINavigationController(rootViewController: SalesViewController()),
+                menuViewController: MenuViewController()
+            )
+        }
         window?.makeKeyAndVisible()
     }
     

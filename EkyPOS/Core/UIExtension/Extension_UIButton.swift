@@ -15,10 +15,10 @@ extension UIButton {
     // Associated property for haptic feedback
     private var feedbackGenerator: UIImpactFeedbackGenerator? {
         get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.feedbackGeneratorKey) as? UIImpactFeedbackGenerator
+            return objc_getAssociatedObject(self, AssociatedKeys.feedbackGeneratorKey) as? UIImpactFeedbackGenerator
         }
         set {
-            objc_setAssociatedObject(self, &AssociatedKeys.feedbackGeneratorKey, newValue, .OBJC_ASSOCIATION_RETAIN)
+            objc_setAssociatedObject(self, AssociatedKeys.feedbackGeneratorKey, newValue, .OBJC_ASSOCIATION_RETAIN)
         }
     }
     

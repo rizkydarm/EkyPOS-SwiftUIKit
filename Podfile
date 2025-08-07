@@ -20,6 +20,8 @@ target 'EkyPOS' do
 
   # https://github.com/marcosgriselli/ViewAnimator
   # https://github.com/HeroTransitions/Hero
+  
+  # https://github.com/Ekhoo/Device
 end
 
 post_install do |installer|
