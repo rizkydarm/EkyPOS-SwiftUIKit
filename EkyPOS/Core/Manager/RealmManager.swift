@@ -17,12 +17,10 @@ class RealmManager {
             do {
                 realm = try Realm()
             } catch {
-                print("CategoryRepo 1 \(error)")
                 completion(.failure(.realmNotInitialized))
             }
         }
         guard let realm = self.realm else {
-            print("CategoryRepo 2")
             completion(.failure(.realmNotInitialized))
             return
         }

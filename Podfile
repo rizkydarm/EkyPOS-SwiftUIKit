@@ -5,6 +5,8 @@ target 'EkyPOS' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
+  pod 'Alamofire', :git => 'https://github.com/Alamofire/Alamofire.git'
+
   # Pods for EkyPOS
   pod 'SnapKit', :git => 'https://github.com/SnapKit/SnapKit.git'
   pod 'RealmSwift', :git => 'https://github.com/realm/realm-swift.git'
@@ -20,6 +22,8 @@ target 'EkyPOS' do
 
   # https://github.com/marcosgriselli/ViewAnimator
   # https://github.com/HeroTransitions/Hero
+
+  
   
   # https://github.com/Ekhoo/Device
 end

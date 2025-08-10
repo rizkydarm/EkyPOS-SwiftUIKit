@@ -8,16 +8,13 @@
 import Foundation
 
 enum RepositoryError: Error, LocalizedError {
-    // Realm specific errors
     case realmNotInitialized
     case realmWriteFailed(Error)
     case realmReadFailed(Error)
     
-    // Data validation errors
     case invalidInput(String)
     case objectNotFound(String)
     
-    // Business logic errors
     case duplicateProduct(String)
     case invalidPrice
     

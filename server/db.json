@@ -3,20 +3,38 @@
         {
             "id": 1,
             "name": "John Doe",
-            "email": "john.doe@example.com",
-            "password": "11111111"
+            "email": "john@g.com",
+            "password": "11111111",
+            "role": "admin",
+            "createdAt": "2025-08-08T10:46:56.000Z",
+            "updatedAt": "2025-08-08T10:46:56.000Z"
         },
         {
             "id": 2,
             "name": "Michael Doe",
-            "email": "michael.doe@example.com",
-            "password": "12345678"
+            "email": "michael@g.com",
+            "password": "12345678",
+            "role": "user",
+            "createdAt": "2025-08-08T10:46:56.000Z",
+            "updatedAt": "2025-08-08T10:46:56.000Z"
         },
         {
             "id": 3,
             "name": "Jane Doe",
-            "email": "jane.doe@example.com",
-            "password": "11111111"
+            "email": "jane@g.com",
+            "password": "11111111",
+            "role": "cashier",
+            "createdAt": "2025-08-08T10:46:56.000Z",
+            "updatedAt": "2025-08-08T10:46:56.000Z"
+        },
+        {
+            "id": 4,
+            "name": "Bambang",
+            "email": "bambang@g.com",
+            "password": "11111111",
+            "role": "manager",
+            "createdAt": "2025-08-08T10:46:56.000Z",
+            "updatedAt": "2025-08-08T10:46:56.000Z"
         }
     ]
 }
