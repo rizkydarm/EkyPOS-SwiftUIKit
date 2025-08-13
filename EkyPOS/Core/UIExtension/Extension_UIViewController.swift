@@ -8,21 +8,20 @@ import UIKit
 
 extension UIViewController {
     
-    var isInSplitView: Bool {
-        guard let splitVC = self.splitViewController else {
-            return false
+    func checkMultitaskingState() {
+        if self.traitCollection.horizontalSizeClass == .compact {
+            // This could be Split View or Slide Over
+            if let windowScene = self.view.window?.windowScene {
+                let safeAreaInsets = windowScene.windows.first?.safeAreaInsets ?? UIEdgeInsets.zero
+                if safeAreaInsets.top > 0 && safeAreaInsets.left > 0 {
+                    print("Split View mode")
+                } else {
+                    print("Slide Over mode")
+                }
+            }
+        } else if self.traitCollection.horizontalSizeClass == .regular {
+            // This is likely Full Screen or Regular size
+            print("Full Screen mode")
         }
-        
-        return splitVC.displayMode != .secondaryOnly &&
-               splitVC.viewControllers.count > 1
     }
-    
-    var isPrimaryVisible: Bool {
-        guard let splitVC = self.splitViewController else {
-            return false
-        }
-        
-        return splitVC.displayMode != .secondaryOnly
-    }
-    
 }

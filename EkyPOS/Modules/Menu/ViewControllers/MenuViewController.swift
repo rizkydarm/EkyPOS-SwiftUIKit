@@ -7,7 +7,6 @@
 
 import UIKit
 import SnapKit
-import SideMenuSwift
 
 class MenuViewController: UIViewController {
     
@@ -23,6 +22,8 @@ class MenuViewController: UIViewController {
         title = "Menu"
         view.backgroundColor = .systemBackground
         view.tintColor = .label
+
+        navigationController?.isNavigationBarHidden = true
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -56,18 +57,6 @@ class MenuViewController: UIViewController {
         
         salesNavContro.navigationBar.tintColor = .label
         
-        sideMenuController?.cache(viewController: salesNavContro, with: "0")
-        sideMenuController?.cache(viewController: categoryproductNavContro, with: "1")
-        sideMenuController?.cache(viewController: transactionNavContro, with: "2")
-        
-        sideMenuController?.delegate = self
-    }
-    
-}
-
-extension MenuViewController: SideMenuControllerDelegate {
-    func sideMenuControllerGetMenuWidth(_ sideMenuController: SideMenuController, for size: CGSize) -> CGFloat? {
-        300
     }
 }
 
@@ -135,7 +124,5 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         
         let row = indexPath.row
-        sideMenuController?.setContentViewController(with: "\(row)", animated: true)
-        sideMenuController?.hideMenu()
     }
 }

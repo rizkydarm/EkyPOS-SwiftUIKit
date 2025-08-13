@@ -96,16 +96,16 @@ class AddProductViewController: UIViewController {
                                 self.didInputComplete?(name, emoji, priceVal, desc)
                                 self.dismiss(animated: true)
                             } else {
-                                showToast(.error, vc: self, message: "Description is empty")
+                                showBanner(.warning, title: "Error", message: "Description is empty")
                             }
                         } else {
-                            showToast(.error, vc: self, message: "Price is empty")
+                            showBanner(.warning, title: "Error", message: "Price is empty")
                         }
                     } else {
-                        showToast(.error, vc: self, message: "Image is not emoji")
+                        showBanner(.warning, title: "Error", message: "Image is not emoji")
                     }
                 } else {
-                    showToast(.error, vc: self, message: "Name is empty")
+                    showBanner(.warning, title: "Error", message: "Name is empty")
                 }
             }
         )

@@ -55,3 +55,4 @@ func showToast(_ type: ToastType, vc: UIViewController, message: String, seconds
         alert.dismiss(animated: true)
     }
 }
+

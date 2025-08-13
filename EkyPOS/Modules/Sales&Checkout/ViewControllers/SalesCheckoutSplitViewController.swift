@@ -14,41 +14,71 @@ class SalesCheckoutSplitViewController: UIViewController {
         setupSplitViewController()
     }
     
-    let primaryViewController = SalesViewController()
-    let secondaryViewController = CheckoutViewController()
-    let menuViewController = MenuViewController()
+    private let primaryViewController = SalesViewController()
+    private let secondaryViewController = CheckoutViewController()
+//    let menuViewController = MenuViewController()
     
     func setupSplitViewController() {
         
-        self.navigationController?.isNavigationBarHidden = true
-        self.navigationController?.isToolbarHidden = true
+        // let primaryNavigationController: UINavigationController = UINavigationController(rootViewController: primaryViewController)
+        // let secondaryNavigationController = UINavigationController(rootViewController: secondaryViewController)
+
+        let splitViewController = UISplitViewController(style: .doubleColumn)
         
-        let primaryNavigationController = UINavigationController(rootViewController: primaryViewController)
-        let secondaryNavigationController = UINavigationController(rootViewController: secondaryViewController)
+        splitViewController.viewControllers = [secondaryViewController, primaryViewController]
         
-        let splitViewController = UISplitViewController()
-        
-//        splitViewController.setViewController(primaryNavigationController, for: .compact)
-//        splitViewController.setViewController(primaryNavigationController, for: .primary)
-//        splitViewController.setViewController(secondaryNavigationController, for: .secondary)
-        splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
-//        splitViewController.preferredSplitBehavior = .tile
+        splitViewController.primaryEdge = .trailing
+
         splitViewController.preferredDisplayMode = .automatic
-//        splitViewController.presentsWithGesture = true
+        splitViewController.preferredSplitBehavior = .automatic
+        splitViewController.displayModeButtonVisibility = .never
+        splitViewController.presentsWithGesture = false
+
+        splitViewController.preferredPrimaryColumnWidthFraction = 0.5
         
         addChild(splitViewController)
         view.addSubview(splitViewController.view)
+        splitViewController.view.translatesAutoresizingMaskIntoConstraints = false
         splitViewController.view.frame = view.bounds
+        splitViewController.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+
         splitViewController.didMove(toParent: self)
         splitViewController.delegate = self
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.isNavigationBarHidden = true        
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        // Check multitasking state when the trait collection changes
+        checkMultitaskingState()
     }
 
 }
 
 extension SalesCheckoutSplitViewController: UISplitViewControllerDelegate {
-//    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
-//        return true
-//    }
+   func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
+       return false
+   }
+   func splitViewController(_ svc: UISplitViewController, willChangeTo displayMode: UISplitViewController.DisplayMode) {
+        switch displayMode {
+        case .automatic:
+            print("Automatic display mode")
+        case .primaryHidden:
+            print("Primary view hidden (Slide Over)")
+        case .allVisible:
+            print("Both views visible (Split View)")
+        case .primaryOverlay:
+            print("Primary view overlay")
+        default:
+            print("Unknown display mode")
+        }
+    }
 //    func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
 //        // When collapsing, show the secondary view controller (on left)
 //        return .primary
@@ -71,9 +101,6 @@ extension SalesCheckoutSplitViewController: UISplitViewControllerDelegate {
 //    func splitViewController(_ splitViewController: UISplitViewController, primaryViewControllerForExpanding secondaryViewController: UIViewController) -> UIViewController? {
 //        print("primaryViewControllerForExpanding secondaryViewController")
 //        return nil
-//    }
-//    func splitViewController(_ svc: UISplitViewController, willChangeTo displayMode: UISplitViewController.DisplayMode) {
-//        print("willChangeTo: \(displayModeDescription(displayMode))")
 //    }
 //    private func displayModeDescription(_ mode: UISplitViewController.DisplayMode) -> String {
 //        switch mode {

@@ -12,20 +12,22 @@ target 'EkyPOS' do
   pod 'RealmSwift', :git => 'https://github.com/realm/realm-swift.git'
   # https://github.com/groue/GRDB.swift
   # https://github.com/stephencelis/SQLite.swift
-  pod 'SideMenuSwift', :git => 'https://github.com/kukushi/SideMenu.git'
-  pod 'AwaitToast', :git => 'https://github.com/k-lpmg/AwaitToast.git'
+  # pod 'SideMenuSwift', :git => 'https://github.com/kukushi/SideMenu.git'
+  pod 'SideMenu', :git => 'https://github.com/jonkykong/SideMenu.git', :tag => '6.5.0'
+  
+  # https://github.com/k-lpmg/AwaitToast
   # https://github.com/devxoul/Toaster
-  # https://github.com/Daltron/NotificationBanner
+  pod 'NotificationBannerSwift', :git => 'https://github.com/Daltron/NotificationBanner.git', :tag => '4.0.0'
 
   # https://github.com/joomcode/BottomSheet
   # https://github.com/SCENEE/FloatingPanel
 
-  # https://github.com/marcosgriselli/ViewAnimator
+  pod 'ViewAnimator', :git => 'https://github.com/marcosgriselli/ViewAnimator.git', :tag => '3.1.0'
   # https://github.com/HeroTransitions/Hero
 
+  pod 'IGListKit', :git => 'https://github.com/Instagram/IGListKit.git', :tag => '5.0.0'
   
-  
-  # https://github.com/Ekhoo/Device
+  pod 'Device', :git => 'https://github.com/Ekhoo/Device.git', :tag => '3.7.0'
 end
 
 post_install do |installer|

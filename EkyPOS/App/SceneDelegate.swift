@@ -6,12 +6,14 @@
 //
 
 import UIKit
-import SideMenuSwift
 import RealmSwift
+import Device
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+
+    var splitViewController: UISplitViewController?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -19,28 +21,42 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        configureGlobalSideMenuController()
 //        deleteRealmDatabase()
         
         window = UIWindow(windowScene: windowScene)
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            window?.rootViewController = SalesCheckoutSplitViewController()
+        var rootVC: UINavigationController?
+        if Device.size() > .screen6_7Inch {
+            rootVC = UINavigationController(rootViewController: SalesCheckoutSplitViewController())
         } else {
-            window?.rootViewController = SideMenuController(
-                contentViewController: UINavigationController(rootViewController: SalesViewController()),
-                menuViewController: MenuViewController()
-            )
+            rootVC = UINavigationController(rootViewController: SalesViewController())
         }
+        rootVC?.isNavigationBarHidden = true
+        window?.rootViewController = rootVC
         window?.makeKeyAndVisible()
     }
-    
-    private func configureGlobalSideMenuController() {
-        SideMenuController.preferences.basic.direction = .left
-        SideMenuController.preferences.basic.defaultCacheKey = "0"
-        SideMenuController.preferences.basic.hideMenuWhenEnteringBackground = true 
-        SideMenuController.preferences.basic.position = .above
-        SideMenuController.preferences.basic.enablePanGesture = false
+
+    func checkMultitaskingState(_ windowScene: UIWindowScene) {
+        let screenSize = windowScene.screen.bounds.size
+        let safeAreaInsets = windowScene.windows.first?.safeAreaInsets ?? UIEdgeInsets.zero
+        let interfaceOrientation = windowScene.interfaceOrientation
+        
+        if windowScene.traitCollection.horizontalSizeClass == .compact {
+            // Likely in Split View or Slide Over
+            if safeAreaInsets.top > 0 && safeAreaInsets.left > 0 {
+                print("Split View mode")
+            } else {
+                print("Slide Over mode")
+            }
+        } else if windowScene.traitCollection.horizontalSizeClass == .regular {
+            // Full Screen mode or regular (non-split view)
+            if screenSize.width == windowScene.screen.bounds.width {
+                print("Full Screen mode")
+            } else {
+                print("Regular mode or large screen with no multitasking")
+            }
+        }
     }
+
     
     func deleteRealmDatabase() {
         guard let realmURL = Realm.Configuration.defaultConfiguration.fileURL else { return }

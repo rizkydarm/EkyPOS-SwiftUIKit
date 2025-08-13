@@ -110,6 +110,8 @@ class CheckoutViewController: UIViewController {
                 let vc = PaymentViewController()
                 vc.checkoutModel = self.checkoutModel
                 self.navigationController?.pushViewController(vc, animated: true)
+            } else {
+                showBanner(.info, title: "Info", message: "Please select at least one product")
             }
         }, for: .touchUpInside)
 
@@ -129,7 +131,7 @@ class CheckoutViewController: UIViewController {
         
         view.addSubview(bottomBar)
         bottomBar.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview()
+            make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.bottom.equalToSuperview()
         }
         

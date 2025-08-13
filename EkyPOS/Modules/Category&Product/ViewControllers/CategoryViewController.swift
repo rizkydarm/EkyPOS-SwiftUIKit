@@ -38,7 +38,7 @@ class CategoryViewController: UIViewController {
         let menuButton = UIBarButtonItem(
             image: UIImage(systemName: "line.3.horizontal")?.withConfiguration(config),
             primaryAction: UIAction { [weak self] _ in
-                self?.sideMenuController?.revealMenu()
+//                self?.sideMenuController?.revealMenu()
             }
         )
         navigationItem.leftBarButtonItem = menuButton
@@ -55,7 +55,7 @@ class CategoryViewController: UIViewController {
                         case .success():
                             self.loadCategories()
                         case .failure(let error):
-                            showToast(.error, vc: self, message: error.localizedDescription)
+                            showBanner(.warning, title: "Error", message: error.localizedDescription)
                         }
                     })
                 }
@@ -92,7 +92,7 @@ class CategoryViewController: UIViewController {
                 self.tableView.reloadData()
                 self.emptyLabel.isHidden = !self.categories.isEmpty
             case .failure(let error):
-                showToast(.error, vc: self, message: error.localizedDescription)
+                showBanner(.warning, title: "Error", message: error.localizedDescription)
             }
         }
     }
@@ -160,7 +160,7 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
                     self.loadCategories()
                 case .failure(let error):
                     completion(false)
-                    showToast(.error, vc: self, message: error.localizedDescription)
+                    showBanner(.warning, title: "Error", message: error.localizedDescription)
                 }
             }
         }
@@ -183,7 +183,7 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
                         self.loadCategories()
                     case .failure(let error):
                         completion(false)
-                        showToast(.error, vc: self, message: error.localizedDescription)
+                        showBanner(.warning, title: "Error", message: error.localizedDescription)
                     }
                 }
             }

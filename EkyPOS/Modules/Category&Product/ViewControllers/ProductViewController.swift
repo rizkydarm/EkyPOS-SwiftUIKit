@@ -57,7 +57,7 @@ class ProductViewController: UIViewController {
                         case .success():
                             self.loadProducts()
                         case .failure(let error):
-                            showToast(.error, vc: self, message: error.localizedDescription)
+                            showBanner(.warning, title: "Error", message: error.localizedDescription)
                         }
                     }
                 }
@@ -94,7 +94,7 @@ class ProductViewController: UIViewController {
                 self.tableView.reloadData()
                 self.emptyLabel.isHidden = !self.products.isEmpty
             case .failure(let error):
-                showToast(.error, vc: self, message: error.localizedDescription)
+                showBanner(.warning, title: "Error", message: error.localizedDescription)
             }
         }
     }
@@ -160,7 +160,7 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
                     self.loadProducts()
                 case .failure(let error):
                     completion(false)
-                    showToast(.error, vc: self, message: error.localizedDescription)
+                    showBanner(.warning, title: "Error", message: error.localizedDescription)
                 }
             }
         }
@@ -183,7 +183,7 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
                         self.loadProducts()
                     case .failure(let error):
                         completion(false)
-                        showToast(.error, vc: self, message: error.localizedDescription)
+                        showBanner(.warning, title: "Error", message: error.localizedDescription)
                     }
                 }
             }

@@ -159,7 +159,7 @@ class PaymentViewController: UIViewController {
                 let totalPrice = self.checkoutModel?.totalPrice ?? 0
                 self.nominalValue = currencyTextFieldDelegate.getRawValue(for: self.nominalTextField)
                 if self.nominalValue < totalPrice {
-                    showToast(.error, vc: self, message: "Nominal is less than total price", seconds: 1)
+                    showBanner(.warning, title: "Error", message: "Nominal is less than total price")
                 } else {
                     let invoiceVC = InvoiceViewController()
                     if let checkoutModel = self.checkoutModel {

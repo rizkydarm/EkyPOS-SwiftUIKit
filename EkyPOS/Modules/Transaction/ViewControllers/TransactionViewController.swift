@@ -41,7 +41,7 @@ class TransactionViewController: UIViewController {
         let menuButton = UIBarButtonItem(
             image: UIImage(systemName: "line.3.horizontal")?.withConfiguration(config),
             primaryAction: UIAction { [weak self] _ in
-                self?.sideMenuController?.revealMenu()
+                
             }
         )
         navigationItem.leftBarButtonItem = menuButton
@@ -72,7 +72,7 @@ class TransactionViewController: UIViewController {
                 self.tableView.reloadData()
                 self.emptyLabel.isHidden = !self.transactions.isEmpty
             case .failure(let error):
-                showToast(.error, vc: self, message: error.localizedDescription)
+                showBanner(.warning, title: "Error", message: error.localizedDescription)
             }
         }
     }
