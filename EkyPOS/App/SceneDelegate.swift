@@ -24,39 +24,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        deleteRealmDatabase()
         
         window = UIWindow(windowScene: windowScene)
-        var rootVC: UINavigationController?
+        var rootNavCon: UINavigationController?
+        
         if Device.size() > .screen6_7Inch {
-            rootVC = UINavigationController(rootViewController: SalesCheckoutSplitViewController())
+            let splitVC = SalesCheckoutSplitViewController()
+            rootNavCon = UINavigationController(rootViewController: splitVC)
         } else {
-            rootVC = UINavigationController(rootViewController: SalesViewController())
+            let salesVC = SalesViewController()
+            rootNavCon = UINavigationController(rootViewController: salesVC)
         }
-        rootVC?.isNavigationBarHidden = true
-        window?.rootViewController = rootVC
+        rootNavCon?.isNavigationBarHidden = true
+        window?.rootViewController = rootNavCon
         window?.makeKeyAndVisible()
     }
-
-    func checkMultitaskingState(_ windowScene: UIWindowScene) {
-        let screenSize = windowScene.screen.bounds.size
-        let safeAreaInsets = windowScene.windows.first?.safeAreaInsets ?? UIEdgeInsets.zero
-        let interfaceOrientation = windowScene.interfaceOrientation
-        
-        if windowScene.traitCollection.horizontalSizeClass == .compact {
-            // Likely in Split View or Slide Over
-            if safeAreaInsets.top > 0 && safeAreaInsets.left > 0 {
-                print("Split View mode")
-            } else {
-                print("Slide Over mode")
-            }
-        } else if windowScene.traitCollection.horizontalSizeClass == .regular {
-            // Full Screen mode or regular (non-split view)
-            if screenSize.width == windowScene.screen.bounds.width {
-                print("Full Screen mode")
-            } else {
-                print("Regular mode or large screen with no multitasking")
-            }
-        }
-    }
-
     
     func deleteRealmDatabase() {
         guard let realmURL = Realm.Configuration.defaultConfiguration.fileURL else { return }

@@ -14,7 +14,16 @@ class SalesViewController: UIViewController {
     
     private let productRepo = ProductRepo()
     private let categoryRepo = CategoryRepo()
-    private var products: [ProductModel] = []
+    private var products: [ProductModel] = [] {
+        didSet {
+            updateSectionedData()
+        }
+    }
+    private var sectionedData: [CategorySectionModel] = [] {
+        didSet {
+            listAdapter.performUpdates(animated: true)
+        }
+    }
     private var categories: [CategoryModel] = []
     
     private lazy var cartViewModel = CartViewModel.shared
@@ -31,7 +40,7 @@ class SalesViewController: UIViewController {
     }()
 
     lazy var listAdapter: ListAdapter = {
-        return ListAdapter(updater: ListAdapterUpdater(), viewController: self)
+        return ListAdapter(updater: ListAdapterUpdater(), viewController: self, workingRangeSize: 1)
     }()
 
     private lazy var emptyLabel: UILabel = {
@@ -68,15 +77,15 @@ class SalesViewController: UIViewController {
     }()
 
     private var isList = true
-    
-    private var isTabletMode: Bool {
-        UIDevice.current.userInterfaceIdiom == .pad
-    }
 
-    private let menuVC = SideMenuNavigationController(rootViewController: MenuViewController())
+    public var mainAppRootNavController: UINavigationController?
+    public var menuIndexPage: Int = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        rootNavigationController?.view.setBorder(color: .systemBlue, width: 5)
+
         setupUI()
     }
 
@@ -85,18 +94,39 @@ class SalesViewController: UIViewController {
         view.backgroundColor = .systemBackground
 
         splitViewController?.preferredPrimaryColumnWidthFraction = 0.5
+
+        let standarAppearance = UINavigationBarAppearance()
+        standarAppearance.configureWithDefaultBackground()
+        standarAppearance.backgroundColor = .systemBrown.withAlphaComponent(0.4)
+        standarAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        standarAppearance.shadowColor = .clear
+        
+        let scrollEdgeAppearance = UINavigationBarAppearance()
+        scrollEdgeAppearance.backgroundColor = .systemBackground
+        scrollEdgeAppearance.shadowColor = .clear
+
+        navigationController?.navigationBar.standardAppearance = standarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = scrollEdgeAppearance   
         
         let config: UIImage.SymbolConfiguration = UIImage.SymbolConfiguration(font: UIFont.systemFont(ofSize: 20, weight: .bold), scale: .large)
         let menuButton = UIBarButtonItem(
             image: UIImage(systemName: "line.3.horizontal")?.withConfiguration(config),
             primaryAction: UIAction { [weak self] _ in
                 guard let self = self else { return }
-                self.menuVC.leftSide = true
-                self.menuVC.menuWidth = 300
-                self.menuVC.animationOptions = .curveEaseOut
-                self.menuVC.presentationStyle = .menuSlideIn
-                self.menuVC.edgesForExtendedLayout = .left
-                self.present(self.menuVC, animated: true)
+                let menuVC = MenuViewController()
+                let menuNavContro = SideMenuNavigationController(rootViewController: menuVC)
+                menuVC.mainAppRootNavController = self.mainAppRootNavController
+                menuVC.menuActiveIndexPage = self.menuIndexPage
+                menuVC.onDidSelectMenu = { [weak self] row in
+                    guard let self = self else { return }
+                    self.dismiss(animated: true)
+                }
+                menuNavContro.leftSide = true
+                menuNavContro.menuWidth = 300
+                menuNavContro.animationOptions = .curveEaseOut
+                menuNavContro.presentationStyle = .menuSlideIn
+                menuNavContro.edgesForExtendedLayout = .left
+                self.present(menuNavContro, animated: true)
             }
         )
         navigationItem.leftBarButtonItem = menuButton
@@ -129,12 +159,6 @@ class SalesViewController: UIViewController {
 
         view.addSubview(listCollectionView)
         
-        // if let layout = listCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-        //     layout.minimumInteritemSpacing = 10
-        //     layout.minimumLineSpacing = 10
-        //     layout.itemSize = CGSize(width: (view.bounds.width - 10) / 2, height: 200)
-        // }
-
         listAdapter.collectionView = listCollectionView
         listAdapter.dataSource = self 
 
@@ -350,21 +374,52 @@ extension SalesViewController: UIScrollViewDelegate {
 }
 
 extension SalesViewController: ListAdapterDataSource {
+
+    private func updateSectionedData() {
+        let groupedProducts = Dictionary(grouping: products) { product in
+            return product.category ?? CategoryModel()
+        }
+        var sections: [CategorySectionModel] = []
+        let sortedCategories = groupedProducts.keys.sorted { $0.name < $1.name }
+
+        for category in sortedCategories {
+            if let products = groupedProducts[category] {
+                let sortedProducts = products.sorted { $0.name < $1.name }
+                let section = CategorySectionModel(category: category, products: sortedProducts)
+                sections.append(section)
+            }
+        }
+        self.sectionedData = sections
+    }
+
+    func isSelected(product: ProductModel) -> Bool {
+        return selectedProducts.contains(product)
+    }
+
+    func selectProduct(product: ProductModel) {
+        selectedProducts.insert(product)
+    }
+
+    func deselectProduct(product: ProductModel) {
+        selectedProducts.remove(product)
+    }
+
+    func getSelectedProducts() -> [ProductModel] {
+        return Array(selectedProducts)
+    }
     
     func objects(for listAdapter: ListAdapter) -> [any ListDiffable] {
-        print("Product count: \(products.count)")
-        return products
+        return sectionedData as [ListDiffable]
     }
 
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
         let sectionController = ProductSectionController()
-        sectionController.product = object as? ProductModel
         return sectionController
     }
 
     func emptyView(for listAdapter: ListAdapter) -> UIView? {
         let view = UIView()
-        view.backgroundColor = .red
+        view.backgroundColor = .systemBackground
         return view
     }
 }

@@ -37,6 +37,8 @@ class ProductViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+
+    public var mainAppRootNavController: UINavigationController?
     
     override func viewDidLoad() {
         super.viewDidLoad()

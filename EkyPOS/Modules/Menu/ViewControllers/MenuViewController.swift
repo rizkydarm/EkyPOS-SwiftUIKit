@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import SideMenu
 
 class MenuViewController: UIViewController {
     
@@ -15,6 +16,12 @@ class MenuViewController: UIViewController {
         table.backgroundColor = .clear
         return table
     }()
+
+    var mainAppRootNavController: UINavigationController?
+
+    var onDidSelectMenu: ((Int) -> Void)?
+
+    var menuActiveIndexPage: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +31,7 @@ class MenuViewController: UIViewController {
         view.tintColor = .label
 
         navigationController?.isNavigationBarHidden = true
+        navigationController?.view.setBorder(color: .systemGreen, width: 5)
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -36,27 +44,22 @@ class MenuViewController: UIViewController {
             make.top.bottom.equalToSuperview()
         }
         
-        UINavigationBar.appearance().tintColor = .label
-        
-        let salesNavContro = UINavigationController(rootViewController: SalesViewController())
-        let categoryproductNavContro = UINavigationController(rootViewController: CategoryViewController())
-        let transactionNavContro = UINavigationController(rootViewController: TransactionViewController())
-        
-        let standarAppearance = UINavigationBarAppearance()
-        standarAppearance.configureWithDefaultBackground()
-        standarAppearance.backgroundColor = .systemBrown.withAlphaComponent(0.4)
-        standarAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        standarAppearance.shadowColor = .clear
-        
-        let scrollEdgeAppearance = UINavigationBarAppearance()
-        scrollEdgeAppearance.backgroundColor = .systemBackground
-        scrollEdgeAppearance.shadowColor = .clear
-
-        salesNavContro.navigationBar.standardAppearance = standarAppearance
-        salesNavContro.navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
-        
-        salesNavContro.navigationBar.tintColor = .label
-        
+//        UINavigationBar.appearance().tintColor = .label
+//        
+//        let standarAppearance = UINavigationBarAppearance()
+//        standarAppearance.configureWithDefaultBackground()
+//        standarAppearance.backgroundColor = .systemBrown.withAlphaComponent(0.4)
+//        standarAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+//        standarAppearance.shadowColor = .clear
+//        
+//        let scrollEdgeAppearance = UINavigationBarAppearance()
+//        scrollEdgeAppearance.backgroundColor = .systemBackground
+//        scrollEdgeAppearance.shadowColor = .clear
+//
+//        salesNavContro.navigationBar.standardAppearance = standarAppearance
+//        salesNavContro.navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
+//        
+//        salesNavContro.navigationBar.tintColor = .label
     }
 }
 
@@ -124,5 +127,35 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         
         let row = indexPath.row
+
+        switch row {
+            case 0:
+            if menuActiveIndexPage != 0 {
+                if isTabletMode {
+                    let salesCheckoutSplitVC = SalesCheckoutSplitViewController()
+                    salesCheckoutSplitVC.mainAppRootNavController = mainAppRootNavController
+                    mainAppRootNavController?.setViewControllers([salesCheckoutSplitVC], animated: true)
+                } else {
+                    mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                    mainAppRootNavController?.setViewControllers([SalesViewController()], animated: true)
+                }
+            }
+            case 1:
+            if menuActiveIndexPage != 1 {
+                let categoryVC = CategoryViewController()
+                mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                mainAppRootNavController?.setViewControllers([categoryVC], animated: true)
+            }
+            case 2:
+            if menuActiveIndexPage != 2 {
+                let transactionVC = TransactionViewController()
+                mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                mainAppRootNavController?.setViewControllers([transactionVC], animated: true)
+            }
+            default:
+            break
+        }
+
+        onDidSelectMenu?(row)
     }
 }

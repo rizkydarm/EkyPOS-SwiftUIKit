@@ -31,4 +31,17 @@ extension UIView {
         layer.cornerRadius = heigth/2
         clipsToBounds = true
     }
+
+    // Computed property for adding a colored border
+    func setBorder(color: UIColor, width: CGFloat) {
+        self.layer.borderColor = color.cgColor
+        self.layer.borderWidth = width
+    }
+    
+    // Convenience method to remove the border
+    func removeBorder() {
+        self.layer.borderColor = nil
+        self.layer.borderWidth = 0
+    }
+
 }

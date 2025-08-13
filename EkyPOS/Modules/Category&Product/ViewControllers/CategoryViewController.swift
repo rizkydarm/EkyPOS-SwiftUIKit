@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import SideMenu
 
 class CategoryViewController: UIViewController {
     
@@ -27,6 +27,8 @@ class CategoryViewController: UIViewController {
         label.textAlignment = .center
         return label
     }()
+
+    public var menuIndexPage: Int = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,11 +36,25 @@ class CategoryViewController: UIViewController {
         title = "Category & Product"
         view.backgroundColor = .systemBackground
         
-        let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .bold)
+        let config: UIImage.SymbolConfiguration = UIImage.SymbolConfiguration(font: UIFont.systemFont(ofSize: 20, weight: .bold), scale: .large)
         let menuButton = UIBarButtonItem(
             image: UIImage(systemName: "line.3.horizontal")?.withConfiguration(config),
             primaryAction: UIAction { [weak self] _ in
-//                self?.sideMenuController?.revealMenu()
+                guard let self = self else { return }
+                let menuVC = MenuViewController()
+                menuVC.mainAppRootNavController = self.rootNavigationController
+                menuVC.onDidSelectMenu = { [weak self] row in
+                    guard let self = self else { return }
+                    self.dismiss(animated: true)
+                }
+                menuVC.menuActiveIndexPage = self.menuIndexPage
+                let menuNavContro = SideMenuNavigationController(rootViewController: menuVC)
+                menuNavContro.leftSide = true
+                menuNavContro.menuWidth = 300
+                menuNavContro.animationOptions = .curveEaseOut
+                menuNavContro.presentationStyle = .menuSlideIn
+                menuNavContro.edgesForExtendedLayout = .left
+                self.present(menuNavContro, animated: true)
             }
         )
         navigationItem.leftBarButtonItem = menuButton

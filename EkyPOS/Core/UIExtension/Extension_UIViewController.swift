@@ -24,4 +24,23 @@ extension UIViewController {
             print("Full Screen mode")
         }
     }
+
+    var isTabletMode: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+
+    var rootNavigationController: UINavigationController? {
+        if let navController = self as? UINavigationController {
+            return navController
+        }
+        
+        var current: UIResponder? = self
+        while current != nil {
+            if let navController = current as? UINavigationController {
+                return navController
+            }
+            current = current?.next
+        }
+        return self.navigationController
+    }
 }

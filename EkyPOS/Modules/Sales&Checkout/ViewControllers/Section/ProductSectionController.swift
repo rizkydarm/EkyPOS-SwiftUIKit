@@ -4,88 +4,73 @@ import UIKit
 
 final class ProductSectionController: ListSectionController {
 
-    public var product: ProductModel?
-    private let isReorderable: Bool
+    private var categorySection: CategorySectionModel?
+    private var selectedIndexes: Set<Int> = []
 
-    required init(isReorderable: Bool = false) {
-        self.isReorderable = isReorderable
+    override required init() {
         super.init()
-        self.minimumInteritemSpacing = 1
-        self.minimumLineSpacing = 1
+        minimumInteritemSpacing = 20
+        minimumLineSpacing = 20
+        inset = UIEdgeInsets(top: 8, left: 20, bottom: 8, right: 20)
     }
 
     override func numberOfItems() -> Int {
-        return 5
+        return (categorySection?.products.count ?? 0) + 1
     }
-
+    
     override func sizeForItem(at index: Int) -> CGSize {
-        return CGSize(width: collectionContext!.containerSize.width, height: 55)
+        guard let context = collectionContext else { return .zero }
+        if index == 0 {
+            return CGSize(width: context.containerSize.width - inset.left - inset.right, height: 50)
+        } else { 
+            return CGSize(width: context.containerSize.width - inset.left - inset.right, height: 80)
+        }
     }
 
     override func cellForItem(at index: Int) -> UICollectionViewCell {
+        guard let categorySection = categorySection else { return UICollectionViewCell() }
 
-        let cell: UICollectionViewCell = UICollectionViewCell()
-        cell.backgroundColor = .systemBackground
+        if index == 0 {
+            let cell = collectionContext?.dequeueReusableCell(of: ProductListCell.self, for: self, at: index) as? ProductListCell ?? ProductListCell()
+            let category = categorySection.category
+            cell.name = category.name
+            return cell
+        } else {
+            let productIndex = index - 1
+            let cell = collectionContext?.dequeueReusableCell(of: ProductListCell.self, for: self, at: index) as? ProductListCell ?? ProductListCell()
+            let product = categorySection.products[productIndex]
 
-        guard let product = product else { return cell }
+            cell.name = product.name
+            cell.emoji = product.image.containsEmoji ? product.image : "🟤"
+            cell.price = rpCurrencyFormatter.string(from: product.price as NSNumber)
+            cell.category = product.category?.name ?? "-"
         
-        // cell.backgroundColor = selectedProducts.contains(product) ? .secondarySystemFill : .secondarySystemBackground
-        cell.layer.cornerRadius = 16
-        cell.layer.masksToBounds = true
-
-        let emoji = UILabel()
-        emoji.textColor = .label
-        emoji.font = .systemFont(ofSize: 24, weight: .bold)
-        emoji.text = product.image.containsEmoji ? product.image : "🟤"
-        cell.contentView.addSubview(emoji)
-        emoji.snp.makeConstraints { make in
-            make.top.left.equalToSuperview().inset(20)
+            return cell
         }
-        
-        let label = UILabel()
-        label.textColor = .label
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.text = product.name
-        cell.contentView.addSubview(label)
-        label.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(20)
-            make.top.equalTo(emoji.snp.bottom).offset(20)
-        }
-        
-        let subLabel = UILabel()
-        subLabel.textColor = .secondaryLabel
-        subLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        subLabel.text = rpCurrencyFormatter.string(from: product.price as NSNumber)
-        cell.contentView.addSubview(subLabel)
-        subLabel.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(20)
-            make.top.equalTo(label.snp.bottom).offset(20)
-        }
-
-        // let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
-        // let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill")?.withConfiguration(config))
-        // checkmark.tintColor = .systemGreen
-        // checkmark.isHidden = !selectedProducts.contains(product)
-        // cell.contentView.addSubview(checkmark)
-        // checkmark.snp.makeConstraints { make in
-        //     make.right.equalToSuperview().inset(20)
-        //     make.top.equalTo(subLabel.snp.bottom).offset(20)
-        //     make.width.height.equalTo(30)
-        // }
-
-        let categoryLabel = UILabel()
-        categoryLabel.textColor = .secondaryLabel
-        categoryLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        categoryLabel.text = product.category?.name ?? "-"
-        cell.contentView.addSubview(categoryLabel)
-        categoryLabel.snp.makeConstraints { make in
-            make.top.right.equalToSuperview().inset(20)
-        }
-        return cell
     }
 
     override func didUpdate(to object: Any) {
-        self.product = object as? ProductModel
+        categorySection = object as? CategorySectionModel
     }
 
+    override func didSelectItem(at index: Int) {
+        
+        guard index > 0, let categorySection = categorySection, let viewController = viewController as? SalesViewController else { return }
+
+        let productIndex = index - 1 // Adjust for header
+        guard productIndex < categorySection.products.count else { return }
+        let product = categorySection.products[productIndex]
+
+        let wasSelected = viewController.isSelected(product: product)
+
+        if wasSelected {
+            viewController.deselectProduct(product: product)
+        } else {
+            viewController.selectProduct(product: product)
+        }
+
+        if let cell = collectionContext?.cellForItem(at: index, sectionController: self) as? ProductListCell {
+            cell.setSelected(wasSelected)
+        }
+    }
 }

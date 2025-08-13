@@ -63,6 +63,8 @@ class CheckoutViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        rootNavigationController?.view.setBorder(color: .systemPink, width: 5)
         
         title = "Checkout"
         view.backgroundColor = .systemBackground
