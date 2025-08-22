@@ -17,11 +17,11 @@ class MenuViewController: UIViewController {
         return table
     }()
 
-    var mainAppRootNavController: UINavigationController?
+    public var mainAppRootNavController: UINavigationController?
 
-    var onDidSelectMenu: ((Int) -> Void)?
+    public var onDidSelectMenu: ((Int) -> Void)?
 
-    var menuActiveIndexPage: Int?
+    public var menuActiveIndexPage: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,23 +43,6 @@ class MenuViewController: UIViewController {
             make.right.equalToSuperview()
             make.top.bottom.equalToSuperview()
         }
-        
-//        UINavigationBar.appearance().tintColor = .label
-//        
-//        let standarAppearance = UINavigationBarAppearance()
-//        standarAppearance.configureWithDefaultBackground()
-//        standarAppearance.backgroundColor = .systemBrown.withAlphaComponent(0.4)
-//        standarAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-//        standarAppearance.shadowColor = .clear
-//        
-//        let scrollEdgeAppearance = UINavigationBarAppearance()
-//        scrollEdgeAppearance.backgroundColor = .systemBackground
-//        scrollEdgeAppearance.shadowColor = .clear
-//
-//        salesNavContro.navigationBar.standardAppearance = standarAppearance
-//        salesNavContro.navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
-//        
-//        salesNavContro.navigationBar.tintColor = .label
     }
 }
 
@@ -136,19 +119,23 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                     salesCheckoutSplitVC.mainAppRootNavController = mainAppRootNavController
                     mainAppRootNavController?.setViewControllers([salesCheckoutSplitVC], animated: true)
                 } else {
+                    let salesVC: SalesViewController = SalesViewController()
+                    salesVC.mainAppRootNavController = mainAppRootNavController
                     mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
-                    mainAppRootNavController?.setViewControllers([SalesViewController()], animated: true)
+                    mainAppRootNavController?.setViewControllers([salesVC], animated: true)
                 }
             }
             case 1:
             if menuActiveIndexPage != 1 {
-                let categoryVC = CategoryViewController()
+                let categoryVC: CategoryViewController = CategoryViewController()
+                categoryVC.mainAppRootNavController = mainAppRootNavController
                 mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                 mainAppRootNavController?.setViewControllers([categoryVC], animated: true)
             }
             case 2:
             if menuActiveIndexPage != 2 {
-                let transactionVC = TransactionViewController()
+                let transactionVC: TransactionViewController = TransactionViewController()
+                transactionVC.mainAppRootNavController = mainAppRootNavController
                 mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                 mainAppRootNavController?.setViewControllers([transactionVC], animated: true)
             }

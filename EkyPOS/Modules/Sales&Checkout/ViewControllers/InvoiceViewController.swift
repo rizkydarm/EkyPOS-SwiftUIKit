@@ -116,7 +116,7 @@ class InvoiceViewController: UIViewController {
                 case .success():
                     self.navigationController?.setViewControllers([SalesViewController()], animated: true)
                 case .failure(let error):
-                    showBanner(.warning, title: "Error", message: error.localizedDescription)
+                    showToast(.warning, title: "Error", message: error.localizedDescription)
                 }
             }
         }, for: .touchUpInside)

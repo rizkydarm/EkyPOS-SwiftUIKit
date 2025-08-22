@@ -28,6 +28,7 @@ class CategoryViewController: UIViewController {
         return label
     }()
 
+    public var mainAppRootNavController: UINavigationController?
     public var menuIndexPage: Int = 1
     
     override func viewDidLoad() {
@@ -36,28 +37,9 @@ class CategoryViewController: UIViewController {
         title = "Category & Product"
         view.backgroundColor = .systemBackground
         
+        addMenuButton(mainAppRootNavController: mainAppRootNavController, menuIndexPage: menuIndexPage)
+
         let config: UIImage.SymbolConfiguration = UIImage.SymbolConfiguration(font: UIFont.systemFont(ofSize: 20, weight: .bold), scale: .large)
-        let menuButton = UIBarButtonItem(
-            image: UIImage(systemName: "line.3.horizontal")?.withConfiguration(config),
-            primaryAction: UIAction { [weak self] _ in
-                guard let self = self else { return }
-                let menuVC = MenuViewController()
-                menuVC.mainAppRootNavController = self.rootNavigationController
-                menuVC.onDidSelectMenu = { [weak self] row in
-                    guard let self = self else { return }
-                    self.dismiss(animated: true)
-                }
-                menuVC.menuActiveIndexPage = self.menuIndexPage
-                let menuNavContro = SideMenuNavigationController(rootViewController: menuVC)
-                menuNavContro.leftSide = true
-                menuNavContro.menuWidth = 300
-                menuNavContro.animationOptions = .curveEaseOut
-                menuNavContro.presentationStyle = .menuSlideIn
-                menuNavContro.edgesForExtendedLayout = .left
-                self.present(menuNavContro, animated: true)
-            }
-        )
-        navigationItem.leftBarButtonItem = menuButton
         let addButton = UIBarButtonItem(
             title: "Add category",
             image: UIImage(systemName: "plus.circle.fill")?.withConfiguration(config),
@@ -71,7 +53,7 @@ class CategoryViewController: UIViewController {
                         case .success():
                             self.loadCategories()
                         case .failure(let error):
-                            showBanner(.warning, title: "Error", message: error.localizedDescription)
+                            showToast(.warning, title: "Error", message: error.localizedDescription)
                         }
                     })
                 }
@@ -108,7 +90,7 @@ class CategoryViewController: UIViewController {
                 self.tableView.reloadData()
                 self.emptyLabel.isHidden = !self.categories.isEmpty
             case .failure(let error):
-                showBanner(.warning, title: "Error", message: error.localizedDescription)
+                showToast(.warning, title: "Error", message: error.localizedDescription)
             }
         }
     }
@@ -176,7 +158,7 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
                     self.loadCategories()
                 case .failure(let error):
                     completion(false)
-                    showBanner(.warning, title: "Error", message: error.localizedDescription)
+                    showToast(.warning, title: "Error", message: error.localizedDescription)
                 }
             }
         }
@@ -199,7 +181,7 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
                         self.loadCategories()
                     case .failure(let error):
                         completion(false)
-                        showBanner(.warning, title: "Error", message: error.localizedDescription)
+                        showToast(.warning, title: "Error", message: error.localizedDescription)
                     }
                 }
             }

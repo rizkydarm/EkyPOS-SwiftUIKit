@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AwaitToast
 
 enum ToastType {
     case info
@@ -42,17 +43,36 @@ enum ToastType {
     }
 }
 
-func showToast(_ type: ToastType, vc: UIViewController, message: String, seconds: Double = 3) {
-    let alert: UIAlertController = UIAlertController(title: type.title, message: message, preferredStyle: .alert)
+
+func showToast(_ type: ToastType, title: String, message: String, seconds: Double = 3) {
+
+    // let defaultAppearance = ToastAppearanceManager.default
+    let iconAppearance = ToastAppearanceManager.icon
+
+    // defaultAppearance.height = 200
+    // defaultAppearance.numberOfLines = 2
+    // defaultAppearance.textAlignment = .left
+    // defaultAppearance.textColor = .label
+
+    iconAppearance.height = 80
+    iconAppearance.numberOfLines = 2
+    iconAppearance.textAlignment = .left
+    iconAppearance.imageTintColor = .label
+    iconAppearance.textColor = .label
+    iconAppearance.backgroundColor = type.color
+
+    let defaultBehavior = ToastBehaviorManager.default
+
+    defaultBehavior.isTappedDismissEnabled = true
+    defaultBehavior.delay = seconds
+    defaultBehavior.showDurarion = 0.3
+    defaultBehavior.duration = seconds
+    defaultBehavior.dismissDuration = 0.3
     
-    // alert.view.backgroundColor = type.color
-    // alert.view.layer.cornerRadius = 16
-    // alert.view.layer.masksToBounds = true
+    let toast = Toast.icon(image: type.icon ?? UIImage(), imageLocation: .left, attributedString: NSAttributedString(string: title+"\n"+message), direction: .bottom)
     
-    vc.present(alert, animated: true)
-    
-    DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-        alert.dismiss(animated: true)
-    }
+    toast.show()
+
+    // toast.dismiss()
 }
 

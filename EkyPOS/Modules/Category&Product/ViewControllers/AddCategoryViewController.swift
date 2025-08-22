@@ -69,10 +69,10 @@ class AddCategoryViewController: UIViewController {
                         self.didInputComplete?(text, emoji)
                         self.dismiss(animated: true)
                     } else {
-                        showBanner(.warning, title: "Error", message: "Text is not emoji")
+                        showToast(.warning, title: "Error", message: "Text is not emoji")
                     }
                 } else {
-                    showBanner(.warning, title: "Error", message: "Text is empty")
+                    showToast(.warning, title: "Error", message: "Text is empty")
                 }
             }
         )

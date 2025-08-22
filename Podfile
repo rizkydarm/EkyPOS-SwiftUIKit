@@ -15,9 +15,9 @@ target 'EkyPOS' do
   # pod 'SideMenuSwift', :git => 'https://github.com/kukushi/SideMenu.git'
   pod 'SideMenu', :git => 'https://github.com/jonkykong/SideMenu.git', :tag => '6.5.0'
   
-  # https://github.com/k-lpmg/AwaitToast
+  pod 'AwaitToast', :git => 'https://github.com/k-lpmg/AwaitToast.git', :tag => '1.2.0'
   # https://github.com/devxoul/Toaster
-  pod 'NotificationBannerSwift', :git => 'https://github.com/Daltron/NotificationBanner.git', :tag => '4.0.0'
+  # pod 'NotificationBannerSwift', :git => 'https://github.com/Daltron/NotificationBanner.git', :tag => '4.0.0'
 
   # https://github.com/joomcode/BottomSheet
   # https://github.com/SCENEE/FloatingPanel
@@ -27,7 +27,7 @@ target 'EkyPOS' do
 
   pod 'IGListKit', :git => 'https://github.com/Instagram/IGListKit.git', :tag => '5.0.0'
   
-  pod 'Device', :git => 'https://github.com/Ekhoo/Device.git', :tag => '3.7.0'
+  # pod 'Device', :git => 'https://github.com/Ekhoo/Device.git', :tag => '3.7.0'
 end
 
 post_install do |installer|

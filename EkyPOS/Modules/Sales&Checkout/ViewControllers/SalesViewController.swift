@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import IGListKit
 import SideMenu
+import ViewAnimator
 
 class SalesViewController: UIViewController {
     
@@ -24,23 +25,25 @@ class SalesViewController: UIViewController {
             listAdapter.performUpdates(animated: true)
         }
     }
-    private var categories: [CategoryModel] = []
     
     private lazy var cartViewModel = CartViewModel.shared
     
     private var selectedProducts: Set<ProductModel> = []
 
-    private lazy var searchController = UISearchController(searchResultsController: nil)
+    private let searchSalesController = SearchSalesViewController()
+    private lazy var searchController = UISearchController(searchResultsController: searchSalesController)
 
     private lazy var listCollectionView: ListCollectionView = {
         let collection = ListCollectionView(frame: .zero)
         collection.backgroundColor = .clear
-        collection.collectionViewLayout = ListCollectionViewLayout(stickyHeaders: true, scrollDirection: .vertical, topContentInset: 0, stretchToEdge: true)
+        collection.collectionViewLayout = ListCollectionViewLayout(stickyHeaders: false, scrollDirection: .vertical, topContentInset: 0, stretchToEdge: false)
         return collection
     }()
 
     lazy var listAdapter: ListAdapter = {
-        return ListAdapter(updater: ListAdapterUpdater(), viewController: self, workingRangeSize: 1)
+        let updater = ListAdapterUpdater()
+        let adapter = ListAdapter(updater: updater, viewController: self)
+        return adapter
     }()
 
     private lazy var emptyLabel: UILabel = {
@@ -83,64 +86,42 @@ class SalesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        rootNavigationController?.view.setBorder(color: .systemBlue, width: 5)
-
         setupUI()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadAllProducts()
+        setBottomBar(size: view.bounds.size)
+        let fromAnimation = AnimationType.from(direction: .bottom, offset: 30)
+        listCollectionView.animate(animations: [fromAnimation])
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        setBottomBar(size: size)
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        listCollectionView.collectionViewLayout.invalidateLayout()
+    }
+
+    func setBottomBar(size: CGSize) {
+        if size.width > 800 {
+            bottomBar.isHidden = true
+        } else {
+            bottomBar.isHidden = false
+        }
     }
 
     private func setupUI() {
         title = "Sales"
         view.backgroundColor = .systemBackground
 
-        splitViewController?.preferredPrimaryColumnWidthFraction = 0.5
-
-        let standarAppearance = UINavigationBarAppearance()
-        standarAppearance.configureWithDefaultBackground()
-        standarAppearance.backgroundColor = .systemBrown.withAlphaComponent(0.4)
-        standarAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        standarAppearance.shadowColor = .clear
+        // setNavigationBarStyle()
         
-        let scrollEdgeAppearance = UINavigationBarAppearance()
-        scrollEdgeAppearance.backgroundColor = .systemBackground
-        scrollEdgeAppearance.shadowColor = .clear
-
-        navigationController?.navigationBar.standardAppearance = standarAppearance
-        navigationController?.navigationBar.scrollEdgeAppearance = scrollEdgeAppearance   
-        
-        let config: UIImage.SymbolConfiguration = UIImage.SymbolConfiguration(font: UIFont.systemFont(ofSize: 20, weight: .bold), scale: .large)
-        let menuButton = UIBarButtonItem(
-            image: UIImage(systemName: "line.3.horizontal")?.withConfiguration(config),
-            primaryAction: UIAction { [weak self] _ in
-                guard let self = self else { return }
-                let menuVC = MenuViewController()
-                let menuNavContro = SideMenuNavigationController(rootViewController: menuVC)
-                menuVC.mainAppRootNavController = self.mainAppRootNavController
-                menuVC.menuActiveIndexPage = self.menuIndexPage
-                menuVC.onDidSelectMenu = { [weak self] row in
-                    guard let self = self else { return }
-                    self.dismiss(animated: true)
-                }
-                menuNavContro.leftSide = true
-                menuNavContro.menuWidth = 300
-                menuNavContro.animationOptions = .curveEaseOut
-                menuNavContro.presentationStyle = .menuSlideIn
-                menuNavContro.edgesForExtendedLayout = .left
-                self.present(menuNavContro, animated: true)
-            }
-        )
-        navigationItem.leftBarButtonItem = menuButton
-        
-        // if !isTabletMode {
-        //     let optionButton = UIBarButtonItem(
-        //         image: isList ? UIImage(systemName: "list.dash")?.withConfiguration(config) : UIImage(systemName: "square.grid.2x2.fill")?.withConfiguration(config),
-        //         primaryAction: UIAction { [weak self] _ in
-        //             guard let self = self else { return }
-        //             self.toggleButtonType()
-        //         }
-        //     )
-        //     navigationItem.rightBarButtonItem = optionButton
-        // }
+        addMenuButton(mainAppRootNavController: mainAppRootNavController, menuIndexPage: menuIndexPage)
 
         navigationController?.navigationBar.prefersLargeTitles = true
         
@@ -161,6 +142,13 @@ class SalesViewController: UIViewController {
         
         listAdapter.collectionView = listCollectionView
         listAdapter.dataSource = self 
+        
+        // listCollectionView.alwaysBounceHorizontal = true
+        // listCollectionView.alwaysBounceVertical = true
+        // listCollectionView.isPagingEnabled = true
+        // listCollectionView.isScrollEnabled = true
+        // listCollectionView.isDirectionalLockEnabled = true
+        // listCollectionView.isPrefetchingEnabled = true
 
         listCollectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
@@ -172,14 +160,7 @@ class SalesViewController: UIViewController {
             make.center.equalToSuperview()
         }
 
-        if !isTabletMode {
-            setupBottomBar()
-        }
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        loadAllProducts()
+        setupBottomBar()
     }
     
     private func loadAllProducts() {
@@ -188,29 +169,11 @@ class SalesViewController: UIViewController {
             switch result {
             case .success(let products):
                 self.products = products
-                self.sortProductsByCategory()
                 self.emptyLabel.isHidden = !products.isEmpty
             case .failure(let error):
-                showBanner(.warning, title: "Error", message: error.localizedDescription)
+                showToast(.warning, title: "Error", message: error.localizedDescription)
             }
         }
-    }
-    
-    private func loadAllCategories() {
-        categoryRepo.getAllCategories() { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let categories):
-                self.categories = categories
-            case .failure(let error):
-                showBanner(.warning, title: "Error", message: error.localizedDescription)
-            }
-        }
-    }
-
-    private func sortProductsByCategory() {
-        let sortedProducts = products.sorted { $0.category?.name ?? "" < $1.category?.name ?? "" }
-        self.products = sortedProducts
     }
     
     private func setupBottomBar() {
@@ -232,12 +195,14 @@ class SalesViewController: UIViewController {
         actionButton.addAction(UIAction { [weak self] _ in
             guard let self = self else { return }
             if self.selectedProducts.isEmpty {
-                showBanner(.warning, title: "Info", message: "Please select at least one product")
+                showToast(.warning, title: "Info", message: "Please select at least one product")
             } else {
                 let vc = CheckoutViewController()
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }, for: .touchUpInside)
+
+        setBottomBar(size: view.bounds.size)
     }
 
     deinit {
@@ -246,114 +211,21 @@ class SalesViewController: UIViewController {
     }
 }
 
-extension SalesViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        60
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return products.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.backgroundColor = .systemBackground
-        
-        let product = products[indexPath.row]
-        
-        let emoji = UILabel()
-        emoji.textColor = .label
-        emoji.font = .systemFont(ofSize: 24, weight: .bold)
-        emoji.text = product.image.containsEmoji ? product.image : "🟤"
-        cell.contentView.addSubview(emoji)
-        emoji.snp.makeConstraints { make in
-            make.left.equalToSuperview().inset(20)
-            make.centerY.equalToSuperview()
-        }
-        
-        let label = UILabel()
-        label.textColor = .label
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.text = product.name
-        cell.contentView.addSubview(label)
-        label.snp.makeConstraints { make in
-            make.left.equalTo(emoji.snp.right).offset(20)
-            make.centerY.equalToSuperview()
-        }
-        let subLabel = UILabel()
-        subLabel.textColor = .secondaryLabel
-        subLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        subLabel.text = rpCurrencyFormatter.string(from: product.price as NSNumber)
-        cell.contentView.addSubview(subLabel)
-        subLabel.snp.makeConstraints { make in
-            make.left.equalTo(label.snp.right).offset(10)
-            make.centerY.equalToSuperview()
-        }
-
-        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
-        let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill")?.withConfiguration(config))
-        checkmark.tintColor = .systemGreen
-        checkmark.isHidden = !selectedProducts.contains(product)
-        cell.contentView.addSubview(checkmark)
-        checkmark.snp.makeConstraints { make in
-            make.right.equalToSuperview().inset(20)
-            make.centerY.equalToSuperview()
-            make.width.height.equalTo(30)
-        }
-
-        let categoryLabel = UILabel()
-        categoryLabel.textColor = .secondaryLabel
-        categoryLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        categoryLabel.text = product.category?.name ?? "-"
-        categoryLabel.isHidden = selectedProducts.contains(product)
-        cell.contentView.addSubview(categoryLabel)
-        categoryLabel.snp.makeConstraints { make in
-            make.right.equalToSuperview().inset(20)
-            make.centerY.equalToSuperview()
-        }
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        tableView.performBatchUpdates({
-            tableView.reloadRows(at: [indexPath], with: .automatic)
-        })
-        tableView.deselectRow(at: indexPath, animated: true)
-        
-        let seletedProduct = products[indexPath.row]
-        if selectedProducts.contains(seletedProduct) {
-            selectedProducts.remove(seletedProduct)
-        } else {
-            selectedProducts.insert(seletedProduct)
-        }
-        
-        cartViewModel.toggleProduct(seletedProduct)
-        
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-    }
-}
-
-
 extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        guard !searchText.isEmpty else {
-            loadAllProducts()
-            return
-        }
-        productRepo.searchProducts(name: searchText) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let products):
-                self.products = products
-                // self.tableView.reloadData()
-                self.emptyLabel.isHidden = !products.isEmpty
-            case .failure(let error):
-                showBanner(.warning, title: "Error", message: error.localizedDescription)
+
+        if searchText.isEmpty {
+            searchSalesController.searchResults = []
+        } else {
+            productRepo.searchProducts(name: searchText) { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success(let products):
+                    self.searchSalesController.searchResults = products
+                case .failure(let error):
+                    showToast(.warning, title: "Error", message: error.localizedDescription)
+                }
             }
         }
     }
@@ -392,20 +264,18 @@ extension SalesViewController: ListAdapterDataSource {
         self.sectionedData = sections
     }
 
-    func isSelected(product: ProductModel) -> Bool {
+    func isSelected(product: ProductModel) -> Bool {        
         return selectedProducts.contains(product)
     }
 
     func selectProduct(product: ProductModel) {
         selectedProducts.insert(product)
+        cartViewModel.toggleProduct(product)
     }
 
     func deselectProduct(product: ProductModel) {
         selectedProducts.remove(product)
-    }
-
-    func getSelectedProducts() -> [ProductModel] {
-        return Array(selectedProducts)
+        cartViewModel.toggleProduct(product)
     }
     
     func objects(for listAdapter: ListAdapter) -> [any ListDiffable] {
@@ -413,8 +283,7 @@ extension SalesViewController: ListAdapterDataSource {
     }
 
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        let sectionController = ProductSectionController()
-        return sectionController
+        return ProductSectionController()
     }
 
     func emptyView(for listAdapter: ListAdapter) -> UIView? {

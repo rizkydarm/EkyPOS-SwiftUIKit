@@ -57,8 +57,6 @@ class CartProductTableViewCell: UITableViewCell {
     func configure(with cartProduct: CartProductModel) {
         self.cartProduct = cartProduct
 
-        print("configure cell with product: \(cartProduct.product.name)")
-
         emoji.text = cartProduct.product.image.containsEmoji ? cartProduct.product.image : "🟤"
         contentView.addSubview(emoji)
         emoji.snp.makeConstraints { make in
@@ -117,6 +115,13 @@ class CartProductTableViewCell: UITableViewCell {
         setupBindings()
     }
 
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+
     private func setupBindings() {
         cartCellViewModel.number = cartProduct?.total ?? 0
         cartCellViewModel.$number
@@ -150,3 +155,4 @@ class CartCellViewModel {
         }
     }
 }
+

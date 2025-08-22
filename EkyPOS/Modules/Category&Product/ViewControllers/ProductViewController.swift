@@ -59,7 +59,7 @@ class ProductViewController: UIViewController {
                         case .success():
                             self.loadProducts()
                         case .failure(let error):
-                            showBanner(.warning, title: "Error", message: error.localizedDescription)
+                            showToast(.warning, title: "Error", message: error.localizedDescription)
                         }
                     }
                 }
@@ -72,6 +72,7 @@ class ProductViewController: UIViewController {
         
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.register(AddedProductCell.self, forCellReuseIdentifier: "cell")
         tableView.separatorStyle = .singleLine
         
         view.addSubview(tableView)
@@ -96,7 +97,7 @@ class ProductViewController: UIViewController {
                 self.tableView.reloadData()
                 self.emptyLabel.isHidden = !self.products.isEmpty
             case .failure(let error):
-                showBanner(.warning, title: "Error", message: error.localizedDescription)
+                showToast(.warning, title: "Error", message: error.localizedDescription)
             }
         }
     }
@@ -115,30 +116,10 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.backgroundColor = .systemBackground
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! AddedProductCell
         
         let product = products[indexPath.row]
-        
-        let emoji = UILabel()
-        emoji.textColor = .label
-        emoji.font = .systemFont(ofSize: 24, weight: .bold)
-        emoji.text = product.image.containsEmoji ? product.image : "🟤"
-        cell.contentView.addSubview(emoji)
-        emoji.snp.makeConstraints { make in
-            make.left.equalToSuperview().inset(20)
-            make.centerY.equalToSuperview()
-        }
-        
-        let label = UILabel()
-        label.textColor = .label
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.text = product.name
-        cell.contentView.addSubview(label)
-        label.snp.makeConstraints { make in
-            make.left.equalTo(emoji.snp.right).offset(20)
-            make.centerY.equalToSuperview()
-        }
+        cell.configure(with: product)
         
         return cell
     }
@@ -162,7 +143,7 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
                     self.loadProducts()
                 case .failure(let error):
                     completion(false)
-                    showBanner(.warning, title: "Error", message: error.localizedDescription)
+                    showToast(.warning, title: "Error", message: error.localizedDescription)
                 }
             }
         }
@@ -185,7 +166,7 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
                         self.loadProducts()
                     case .failure(let error):
                         completion(false)
-                        showBanner(.warning, title: "Error", message: error.localizedDescription)
+                        showToast(.warning, title: "Error", message: error.localizedDescription)
                     }
                 }
             }

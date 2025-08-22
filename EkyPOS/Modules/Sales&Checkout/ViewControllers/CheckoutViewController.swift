@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+import ViewAnimator
 
 class CheckoutViewController: UIViewController {
     
@@ -64,8 +65,6 @@ class CheckoutViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        rootNavigationController?.view.setBorder(color: .systemPink, width: 5)
-        
         title = "Checkout"
         view.backgroundColor = .systemBackground
         
@@ -113,7 +112,7 @@ class CheckoutViewController: UIViewController {
                 vc.checkoutModel = self.checkoutModel
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
-                showBanner(.info, title: "Info", message: "Please select at least one product")
+                showToast(.info, title: "Info", message: "Please select at least one product")
             }
         }, for: .touchUpInside)
 
@@ -138,6 +137,12 @@ class CheckoutViewController: UIViewController {
         }
         
         setupBindings()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        let animation = AnimationType.from(direction: .left, offset: 50)
+        tableView.visibleCells.forEach { $0.animate(animations: [animation]) }
     }
     
     private func setupBindings() {
@@ -188,8 +193,12 @@ extension CheckoutViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CartProductCell", for: indexPath) as! CartProductTableViewCell
+        let cell: CartProductTableViewCell = tableView.dequeueReusableCell(withIdentifier: "CartProductCell", for: indexPath) as! CartProductTableViewCell
         cell.configure(with: cartViewModel.cartProducts[indexPath.row])
+
+        let animation = AnimationType.from(direction: .bottom, offset: 30)
+        cell.animate(animations: [animation])
+
         return cell
     }
     
