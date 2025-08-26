@@ -35,9 +35,8 @@ extension UIViewController {
                 let menuNavContro = SideMenuNavigationController(rootViewController: menuVC)
                 menuVC.mainAppRootNavController = mainAppRootNavController
                 menuVC.menuActiveIndexPage = menuIndexPage
-                menuVC.onDidSelectMenu = { [weak self] row in
-                    guard let self = self else { return }
-                    self.dismiss(animated: true)
+                menuVC.onDidSelectMenu = { _ in
+                    menuNavContro.dismiss(animated: true)
                 }
                 menuNavContro.leftSide = true
                 menuNavContro.menuWidth = 300

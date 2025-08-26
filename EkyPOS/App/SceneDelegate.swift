@@ -22,15 +22,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(windowScene: windowScene)
         var rootNavCon: UINavigationController?
+
+        let device = UIDevice.current.userInterfaceIdiom
+        let windowWidth = window?.bounds.width ?? 0
         
-        if UIDevice.current.userInterfaceIdiom == .pad  || UIDevice.current.userInterfaceIdiom == .mac {
+        if device == .pad  || device == .mac || windowWidth > 800 {
             let splitVC = SalesCheckoutSplitViewController()
             rootNavCon = UINavigationController(rootViewController: splitVC)
+            rootNavCon?.isNavigationBarHidden = true
         } else {
             let salesVC = SalesViewController()
             rootNavCon = UINavigationController(rootViewController: salesVC)
+            rootNavCon?.isNavigationBarHidden = false
         }
-        rootNavCon?.isNavigationBarHidden = true
         window?.rootViewController = rootNavCon
         window?.makeKeyAndVisible()
     }

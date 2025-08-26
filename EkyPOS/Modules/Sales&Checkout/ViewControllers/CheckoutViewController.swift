@@ -7,7 +7,6 @@
 
 import UIKit
 import Combine
-import ViewAnimator
 
 class CheckoutViewController: UIViewController {
     
@@ -138,12 +137,6 @@ class CheckoutViewController: UIViewController {
         
         setupBindings()
     }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        let animation = AnimationType.from(direction: .left, offset: 50)
-        tableView.visibleCells.forEach { $0.animate(animations: [animation]) }
-    }
     
     private func setupBindings() {
         
@@ -195,10 +188,7 @@ extension CheckoutViewController: UITableViewDelegate, UITableViewDataSource {
         
         let cell: CartProductTableViewCell = tableView.dequeueReusableCell(withIdentifier: "CartProductCell", for: indexPath) as! CartProductTableViewCell
         cell.configure(with: cartViewModel.cartProducts[indexPath.row])
-
-        let animation = AnimationType.from(direction: .bottom, offset: 30)
-        cell.animate(animations: [animation])
-
+        
         return cell
     }
     

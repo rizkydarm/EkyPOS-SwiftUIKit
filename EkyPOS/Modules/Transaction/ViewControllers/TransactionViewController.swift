@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SideMenu
 
 class TransactionViewController: UIViewController {
 
@@ -41,7 +40,7 @@ class TransactionViewController: UIViewController {
         title = "Transaction"
         view.backgroundColor = .systemBackground
         
-        addMenuButton(mainAppRootNavController: mainAppRootNavController, menuIndexPage: menuIndexPage)
+        addMenuButton(mainAppRootNavController: mainAppRootNavController ?? rootNavigationController, menuIndexPage: menuIndexPage)
 
         tableView.dataSource = self
         tableView.delegate = self

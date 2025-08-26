@@ -39,13 +39,19 @@ class ProductViewController: UIViewController {
     }()
 
     public var mainAppRootNavController: UINavigationController?
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationItem.largeTitleDisplayMode = .never
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "\(category.name) Product"
         view.backgroundColor = .systemBackground
-        
+
         let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .bold)
         let addButton = UIBarButtonItem(
             image: UIImage(systemName: "plus.circle.fill")?.withConfiguration(config),

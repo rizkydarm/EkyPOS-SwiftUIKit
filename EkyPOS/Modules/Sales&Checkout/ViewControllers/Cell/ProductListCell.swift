@@ -45,8 +45,12 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         return checkmark
     }()
 
+    var product: ProductModel?
+
     func bindViewModel(_ viewModel: Any) {
         guard let viewModel = viewModel as? ProductModel else { return }
+
+        product = viewModel
 
         nameLabel.text = viewModel.name
         emojiLabel.text = viewModel.image.containsEmoji ? viewModel.image : "🟤"
@@ -60,6 +64,9 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+
+        let interaction = UIContextMenuInteraction(delegate: self)
+        self.addInteraction(interaction)
 
         contentView.addSubview(nameLabel)
         contentView.addSubview(emojiLabel)
@@ -106,5 +113,59 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         self.checkmarkImageView.alpha = isSelected ? 1.0 : 0.0
         self.checkmarkImageView.isHidden = isSelected ? false : true
         self.checkmarkImageView.transform = isSelected ? CGAffineTransform.identity : CGAffineTransform(scaleX: 0.1, y: 0.1)
+    }
+}
+
+extension ProductListCell: UIContextMenuInteractionDelegate {
+    
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(
+            identifier: nil,
+            previewProvider: {
+                let previewVC: FocusPreviewViewController = FocusPreviewViewController()
+                previewVC.product = self.product
+                return previewVC
+            },
+            actionProvider: { suggestedActions in
+                let share = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { action in
+                    
+                }
+                let save = UIAction(title: "Save", image: UIImage(systemName: "bookmark")) { action in
+                    
+                }
+                let add = UIAction(title: "Add", image: UIImage(systemName: "plus.circle.fill")) { action in
+                    
+                }
+                let favorite = UIAction(title: "Favorite", image: UIImage(systemName: "heart.fill")) { action in
+                    
+                }
+                let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash.fill")) { action in
+                    
+                }
+                return UIMenu(title: "Menu", children: [share, save, add, favorite, delete])
+            }
+        )
+    }
+}
+
+class FocusPreviewViewController: UIViewController {
+    
+    public var product: ProductModel?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+        let emojiLabel = UILabel()
+        emojiLabel.text = (product?.image.containsEmoji ?? false) ? product?.image : "🟤"
+        emojiLabel.font = .systemFont(ofSize: 40, weight: .bold)
+        emojiLabel.contentMode = .scaleAspectFit
+        emojiLabel.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        emojiLabel.textAlignment = .center
+        view.addSubview(emojiLabel)
+        emojiLabel.snp.makeConstraints { make in
+            make.width.height.equalTo(200)
+            make.center.equalToSuperview()
+        }
     }
 }

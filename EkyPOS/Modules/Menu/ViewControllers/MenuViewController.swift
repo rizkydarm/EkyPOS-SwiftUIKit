@@ -22,6 +22,22 @@ class MenuViewController: UIViewController {
     public var onDidSelectMenu: ((Int) -> Void)?
 
     public var menuActiveIndexPage: Int?
+
+    private var transitionManager: FadeTransitionManager?
+
+    func setViewControllersWithFade(_ viewControllers: [UIViewController]) {
+        guard let mainAppRootNavController = mainAppRootNavController ?? rootNavigationController else { return }
+        
+        transitionManager = FadeTransitionManager(duration: 0.3)
+        mainAppRootNavController.delegate = transitionManager
+        
+        mainAppRootNavController.setViewControllers(viewControllers, animated: false)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.mainAppRootNavController?.delegate = nil
+            self.transitionManager = nil
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +47,7 @@ class MenuViewController: UIViewController {
         view.tintColor = .label
 
         navigationController?.isNavigationBarHidden = true
-        navigationController?.view.setBorder(color: .systemGreen, width: 5)
+        // navigationController?.view.setBorder(color: .systemGreen, width: 5)
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -121,23 +137,27 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 } else {
                     let salesVC: SalesViewController = SalesViewController()
                     salesVC.mainAppRootNavController = mainAppRootNavController
-                    mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
-                    mainAppRootNavController?.setViewControllers([salesVC], animated: true)
+                    setViewControllersWithFade([salesVC])
+                    // mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                    // mainAppRootNavController?.navigationBar.prefersLargeTitles = true
                 }
             }
             case 1:
             if menuActiveIndexPage != 1 {
                 let categoryVC: CategoryViewController = CategoryViewController()
                 categoryVC.mainAppRootNavController = mainAppRootNavController
-                mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                 mainAppRootNavController?.setViewControllers([categoryVC], animated: true)
+                // mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                // mainAppRootNavController?.navigationBar.prefersLargeTitles = true
+                // navigationItem.largeTitleDisplayMode = .always
             }
             case 2:
             if menuActiveIndexPage != 2 {
                 let transactionVC: TransactionViewController = TransactionViewController()
                 transactionVC.mainAppRootNavController = mainAppRootNavController
-                mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                 mainAppRootNavController?.setViewControllers([transactionVC], animated: true)
+                // mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                // mainAppRootNavController?.navigationBar.prefersLargeTitles = false
             }
             default:
             break

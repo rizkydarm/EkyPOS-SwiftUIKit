@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SideMenu
 
 class CategoryViewController: UIViewController {
     
@@ -28,17 +27,73 @@ class CategoryViewController: UIViewController {
         return label
     }()
 
+    private lazy var searchController = UISearchController(searchResultsController: nil)
+
     public var mainAppRootNavController: UINavigationController?
     public var menuIndexPage: Int = 1
+
+    var count = 0
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        addSearchBar()
+        print("\(count) viewWillAppear")
+        count += 1
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        print("\(count) viewDidLoad")
+        count += 1
         
         title = "Category & Product"
         view.backgroundColor = .systemBackground
-        
-        addMenuButton(mainAppRootNavController: mainAppRootNavController, menuIndexPage: menuIndexPage)
 
+        // navigationController?.navigationBar.prefersLargeTitles = true
+        // navigationItem.largeTitleDisplayMode = .always
+        
+        addMenuButton(mainAppRootNavController: mainAppRootNavController ?? rootNavigationController, menuIndexPage: menuIndexPage)
+        addAddCategoryButton()
+
+        
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.separatorStyle = .singleLine
+        
+        view.addSubview(tableView)
+        tableView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        view.addSubview(emptyLabel)
+        emptyLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
+        loadCategories()
+    }
+
+    private func addSearchBar() {
+        searchController.searchBar.placeholder = "Search"
+        // searchController.obscuresBackgroundDuringPresentation = false
+        // searchController.hidesNavigationBarDuringPresentation = false
+
+        // navigationItem.hidesSearchBarWhenScrolling = true
+        // if #available(iOS 16.0, *) {
+        //     navigationItem.preferredSearchBarPlacement = .inline
+        // }
+
+        searchController.searchBar.searchBarStyle = .default
+        searchController.searchBar.tintColor = .label
+        
+        navigationItem.searchController = searchController
+    }
+
+    private func addAddCategoryButton() {
         let config: UIImage.SymbolConfiguration = UIImage.SymbolConfiguration(font: UIFont.systemFont(ofSize: 20, weight: .bold), scale: .large)
         let addButton = UIBarButtonItem(
             title: "Add category",
@@ -63,22 +118,6 @@ class CategoryViewController: UIViewController {
         )
         navigationItem.rightBarButtonItem = addButton
         navigationItem.rightBarButtonItem?.tintColor = .systemBrown
-        
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.separatorStyle = .singleLine
-        
-        view.addSubview(tableView)
-        tableView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        view.addSubview(emptyLabel)
-        emptyLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-        
-        loadCategories()
     }
     
     private func loadCategories() {
@@ -140,6 +179,7 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedCategory = categories[indexPath.row]
+        // navigationController?.navigationBar.prefersLargeTitles = false
         navigationController?.pushViewController(ProductViewController(category: selectedCategory), animated: true)
     }
     

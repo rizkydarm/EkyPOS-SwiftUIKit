@@ -8,8 +8,6 @@
 import UIKit
 import SnapKit
 import IGListKit
-import SideMenu
-import ViewAnimator
 
 class SalesViewController: UIViewController {
     
@@ -93,8 +91,8 @@ class SalesViewController: UIViewController {
         super.viewWillAppear(animated)
         loadAllProducts()
         setBottomBar(size: view.bounds.size)
-        let fromAnimation = AnimationType.from(direction: .bottom, offset: 30)
-        listCollectionView.animate(animations: [fromAnimation])
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -107,7 +105,7 @@ class SalesViewController: UIViewController {
         listCollectionView.collectionViewLayout.invalidateLayout()
     }
 
-    func setBottomBar(size: CGSize) {
+    private func setBottomBar(size: CGSize) {
         if size.width > 800 {
             bottomBar.isHidden = true
         } else {
@@ -118,29 +116,12 @@ class SalesViewController: UIViewController {
     private func setupUI() {
         title = "Sales"
         view.backgroundColor = .systemBackground
-
-        // setNavigationBarStyle()
         
-        addMenuButton(mainAppRootNavController: mainAppRootNavController, menuIndexPage: menuIndexPage)
-
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
-        searchController.delegate = self
-        searchController.searchBar.delegate = self
-        searchController.searchBar.placeholder = "Search"
-        searchController.obscuresBackgroundDuringPresentation = true
-        searchController.hidesNavigationBarDuringPresentation = true
-
-        navigationItem.hidesSearchBarWhenScrolling = true
-
-        searchController.searchBar.searchBarStyle = .minimal
-        searchController.searchBar.tintColor = .label
-        
-        navigationItem.searchController = searchController
+        addMenuButton(mainAppRootNavController: mainAppRootNavController ?? rootNavigationController, menuIndexPage: menuIndexPage)
+        addSearchBar()
 
         view.addSubview(listCollectionView)
         
-        listAdapter.collectionView = listCollectionView
         listAdapter.dataSource = self 
         
         // listCollectionView.alwaysBounceHorizontal = true
@@ -155,12 +136,18 @@ class SalesViewController: UIViewController {
             make.leading.trailing.bottom.equalToSuperview()
         }
 
+        listAdapter.collectionView = listCollectionView
+
+        listAdapter.collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 160, right: 0)
+
         view.addSubview(emptyLabel)
         emptyLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
 
-        setupBottomBar()
+        addBottomBar()
+
+        loadAllProducts()
     }
     
     private func loadAllProducts() {
@@ -175,8 +162,26 @@ class SalesViewController: UIViewController {
             }
         }
     }
+
+    private func addSearchBar() {
+        searchController.delegate = self
+        searchController.searchBar.delegate = self
+        searchController.searchBar.placeholder = "Search"
+        searchController.obscuresBackgroundDuringPresentation = true
+        searchController.hidesNavigationBarDuringPresentation = true
+
+        navigationItem.hidesSearchBarWhenScrolling = true
+        if #available(iOS 16.0, *) {
+            navigationItem.preferredSearchBarPlacement = .stacked
+        }
+
+        searchController.searchBar.searchBarStyle = .default
+        searchController.searchBar.tintColor = .label
+        
+        navigationItem.searchController = searchController
+    }
     
-    private func setupBottomBar() {
+    private func addBottomBar() {
         
         view.addSubview(bottomBar)
         bottomBar.snp.makeConstraints { make in
@@ -231,19 +236,19 @@ extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
     }
 }
 
-extension SalesViewController: UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard let leftButton = self.navigationItem.leftBarButtonItem else {
-            return
-        }
-        let isScrollingDown = scrollView.contentOffset.y > -90
-        if isScrollingDown {
-            leftButton.tintColor = .label
-        } else {
-            leftButton.tintColor = .systemBrown
-        }
-    }
-}
+// extension SalesViewController: UIScrollViewDelegate {
+//     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//         guard let leftButton = self.navigationItem.leftBarButtonItem else {
+//             return
+//         }
+//         let isScrollingDown = scrollView.contentOffset.y > -90
+//         if isScrollingDown {
+//             leftButton.tintColor = .label
+//         } else {
+//             leftButton.tintColor = .systemBrown
+//         }
+//     }
+// }
 
 extension SalesViewController: ListAdapterDataSource {
 
