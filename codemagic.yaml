@@ -5,8 +5,11 @@ workflows:
     name: iOS Native
     max_build_duration: 120
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
     environment:
       ios_signing:
+        distribution_type: development
         bundle_identifier: rizkyeky.EkyPOS
       vars:
         BUNDLE_ID: "rizkyeky.EkyPOS"
