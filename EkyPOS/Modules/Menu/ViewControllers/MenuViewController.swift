@@ -138,7 +138,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                     let salesVC: SalesViewController = SalesViewController()
                     salesVC.mainAppRootNavController = mainAppRootNavController
                     setViewControllersWithFade([salesVC])
-                    // mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                    mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                     // mainAppRootNavController?.navigationBar.prefersLargeTitles = true
                 }
             }
@@ -147,7 +147,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 let categoryVC: CategoryViewController = CategoryViewController()
                 categoryVC.mainAppRootNavController = mainAppRootNavController
                 mainAppRootNavController?.setViewControllers([categoryVC], animated: true)
-                // mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                 // mainAppRootNavController?.navigationBar.prefersLargeTitles = true
                 // navigationItem.largeTitleDisplayMode = .always
             }
@@ -156,7 +156,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 let transactionVC: TransactionViewController = TransactionViewController()
                 transactionVC.mainAppRootNavController = mainAppRootNavController
                 mainAppRootNavController?.setViewControllers([transactionVC], animated: true)
-                // mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
+                mainAppRootNavController?.setNavigationBarHidden(false, animated: true)
                 // mainAppRootNavController?.navigationBar.prefersLargeTitles = false
             }
             default:

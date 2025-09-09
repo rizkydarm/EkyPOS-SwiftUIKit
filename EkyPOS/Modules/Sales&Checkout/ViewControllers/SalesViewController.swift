@@ -28,8 +28,8 @@ class SalesViewController: UIViewController {
     
     private var selectedProducts: Set<ProductModel> = []
 
-    private let searchSalesController = SearchSalesViewController()
-    private lazy var searchController = UISearchController(searchResultsController: searchSalesController)
+    private let searchSalesController: SearchSalesViewController = SearchSalesViewController()
+    private lazy var searchController: UISearchController = UISearchController(searchResultsController: searchSalesController)
 
     private lazy var listCollectionView: ListCollectionView = {
         let collection = ListCollectionView(frame: .zero)
@@ -85,6 +85,8 @@ class SalesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+
+        (searchController.searchResultsController as? SearchSalesViewController)?.salesViewController = self
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -234,6 +236,14 @@ extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
             }
         }
     }
+
+    func searchController(_ searchController: UISearchController, didCancelSearch searchResults: [ProductModel]) {
+        print("cancel")
+    }
+
+    func searchController(_ searchController: UISearchController, didDismissSearch searchResults: [ProductModel]) {
+        print("dismiss")
+    }
 }
 
 // extension SalesViewController: UIScrollViewDelegate {
@@ -299,12 +309,12 @@ extension SalesViewController: ListAdapterDataSource {
 }
 
 #if canImport(SwiftUI) && DEBUG
-import SwiftUI
+//import SwiftUI
 
-@available(iOS 17.0, *)
-#Preview("SalesViewController (iOS 17+)") {
-    SalesViewController()
-}
+//@available(iOS 17.0, *)
+//#Preview("SalesViewController (iOS 17+)") {
+//    SalesViewController()
+//}
 //@available(iOS 13.0, *)
 //struct SalesViewController_Preview: PreviewProvider {
 //    static var previews: some View {

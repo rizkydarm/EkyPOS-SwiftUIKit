@@ -64,7 +64,7 @@ class SalesCheckoutSplitViewController: UIViewController {
     }
 
     func setColumn() {
-        print("SplitView width: ", view.bounds.size.width)
+        // print("SplitView width: ", view.bounds.size.width)
         if (isTabletMode && isPotrait) || view.bounds.size.width < 800 {
             _splitViewController.preferredPrimaryColumnWidthFraction = 0
             _splitViewController.minimumPrimaryColumnWidth = 0
