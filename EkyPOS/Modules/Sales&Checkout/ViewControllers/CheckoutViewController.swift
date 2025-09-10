@@ -33,7 +33,7 @@ class CheckoutViewController: UIViewController {
 
     private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Pay", for: .normal)
+        button.setTitle("Checkout", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         button.backgroundColor = .systemBrown
         button.tintColor = .label
@@ -109,7 +109,12 @@ class CheckoutViewController: UIViewController {
             if self.checkoutModel.cartProducts.isEmpty == false {
                 let vc = PaymentViewController()
                 vc.checkoutModel = self.checkoutModel
-                self.navigationController?.pushViewController(vc, animated: true)
+                if isTabletMode {
+                    vc.modalPresentationStyle = .formSheet
+                    self.present(vc, animated: true)
+                } else {
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
             } else {
                 showToast(.info, title: "Info", message: "Please select at least one product")
             }

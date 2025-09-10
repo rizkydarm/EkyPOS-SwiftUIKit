@@ -14,6 +14,6 @@ class TransactionModel: Object {
     @Persisted var totalUnit: Int
     @Persisted var changes: Double
     @Persisted var paymentMethod: String
-    @Persisted var products: List<ProductModel>
+    @Persisted var cartProducts: List<CartProductModel> = List<CartProductModel>()
 }
 

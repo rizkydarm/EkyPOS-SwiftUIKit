@@ -4,6 +4,8 @@ import UIKit
 
 final class ProductSectionController: ListBindingSectionController<CategorySectionModel> {
 
+    public var isSearchMode: Bool = false
+
     override required init() {
         super.init()
         minimumInteritemSpacing = 0
@@ -75,8 +77,12 @@ extension ProductSectionController: ListBindingSectionControllerSelectionDelegat
 
 extension ProductSectionController: ListSupplementaryViewSource {  
       
-    func supportedElementKinds() -> [String] {  
-        return [UICollectionView.elementKindSectionHeader]  
+    func supportedElementKinds() -> [String] { 
+        if isSearchMode {
+            return []
+        } else {
+            return [UICollectionView.elementKindSectionHeader]  
+        } 
     }  
       
     func viewForSupplementaryElement(ofKind elementKind: String, at index: Int) -> UICollectionReusableView {  

@@ -23,13 +23,18 @@ class SalesViewController: UIViewController {
             listAdapter.performUpdates(animated: true)
         }
     }
+    private var searchResultProducts: [ProductModel] = [] {
+        didSet {
+            listAdapter.performUpdates(animated: true)
+        }
+    }
     
-    private lazy var cartViewModel = CartViewModel.shared
+    public lazy var cartViewModel = CartViewModel.shared
     
-    private var selectedProducts: Set<ProductModel> = []
+    public var selectedProducts: Set<ProductModel> = []
 
-    private let searchSalesController: SearchSalesViewController = SearchSalesViewController()
-    private lazy var searchController: UISearchController = UISearchController(searchResultsController: searchSalesController)
+    // private lazy var searchSalesController = SearchSalesViewController()
+    private lazy var searchController: UISearchController = UISearchController(searchResultsController: nil)
 
     private lazy var listCollectionView: ListCollectionView = {
         let collection = ListCollectionView(frame: .zero)
@@ -85,8 +90,6 @@ class SalesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-
-        (searchController.searchResultsController as? SearchSalesViewController)?.salesViewController = self
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -125,13 +128,6 @@ class SalesViewController: UIViewController {
         view.addSubview(listCollectionView)
         
         listAdapter.dataSource = self 
-        
-        // listCollectionView.alwaysBounceHorizontal = true
-        // listCollectionView.alwaysBounceVertical = true
-        // listCollectionView.isPagingEnabled = true
-        // listCollectionView.isScrollEnabled = true
-        // listCollectionView.isDirectionalLockEnabled = true
-        // listCollectionView.isPrefetchingEnabled = true
 
         listCollectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
@@ -147,9 +143,22 @@ class SalesViewController: UIViewController {
             make.center.equalToSuperview()
         }
 
-        addBottomBar()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleReset),
+            name: .resetSalesVC,
+            object: nil
+        )
 
+        addBottomBar()
         loadAllProducts()
+    }
+
+    @objc func handleReset() {
+        selectedProducts.removeAll()
+        cartViewModel.resetCart()
+        listCollectionView.reloadData()
+        listAdapter.performUpdates(animated: true)
     }
     
     private func loadAllProducts() {
@@ -169,15 +178,15 @@ class SalesViewController: UIViewController {
         searchController.delegate = self
         searchController.searchBar.delegate = self
         searchController.searchBar.placeholder = "Search"
-        searchController.obscuresBackgroundDuringPresentation = true
-        searchController.hidesNavigationBarDuringPresentation = true
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
 
         navigationItem.hidesSearchBarWhenScrolling = true
         if #available(iOS 16.0, *) {
             navigationItem.preferredSearchBarPlacement = .stacked
         }
 
-        searchController.searchBar.searchBarStyle = .default
+        searchController.searchBar.searchBarStyle = .minimal
         searchController.searchBar.tintColor = .label
         
         navigationItem.searchController = searchController
@@ -215,6 +224,7 @@ class SalesViewController: UIViewController {
     deinit {
         selectedProducts.removeAll()
         cartViewModel.resetCart()
+        NotificationCenter.default.removeObserver(self, name: .resetSalesVC, object: nil)
     }
 }
 
@@ -223,13 +233,13 @@ extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
 
         if searchText.isEmpty {
-            searchSalesController.searchResults = []
+            searchResultProducts = []
         } else {
             productRepo.searchProducts(name: searchText) { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let products):
-                    self.searchSalesController.searchResults = products
+                    self.searchResultProducts = products
                 case .failure(let error):
                     showToast(.warning, title: "Error", message: error.localizedDescription)
                 }
@@ -237,31 +247,16 @@ extension SalesViewController: UISearchBarDelegate, UISearchControllerDelegate {
         }
     }
 
-    func searchController(_ searchController: UISearchController, didCancelSearch searchResults: [ProductModel]) {
-        print("cancel")
+    func willPresentSearchController(_ searchController: UISearchController) {
+        searchResultProducts = []
     }
 
-    func searchController(_ searchController: UISearchController, didDismissSearch searchResults: [ProductModel]) {
-        print("dismiss")
+    func didDismissSearchController(_ searchController: UISearchController) {
+        searchResultProducts = []
     }
 }
 
-// extension SalesViewController: UIScrollViewDelegate {
-//     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//         guard let leftButton = self.navigationItem.leftBarButtonItem else {
-//             return
-//         }
-//         let isScrollingDown = scrollView.contentOffset.y > -90
-//         if isScrollingDown {
-//             leftButton.tintColor = .label
-//         } else {
-//             leftButton.tintColor = .systemBrown
-//         }
-//     }
-// }
-
-extension SalesViewController: ListAdapterDataSource {
-
+extension SalesViewController {
     private func updateSectionedData() {
         let groupedProducts = Dictionary(grouping: products) { product in
             return product.category ?? CategoryModel()
@@ -292,18 +287,38 @@ extension SalesViewController: ListAdapterDataSource {
         selectedProducts.remove(product)
         cartViewModel.toggleProduct(product)
     }
+}
+
+extension SalesViewController: ListAdapterDataSource {
     
     func objects(for listAdapter: ListAdapter) -> [any ListDiffable] {
-        return sectionedData as [ListDiffable]
+        if searchController.isActive {
+            let sectionedData = CategorySectionModel(category: CategoryModel(), products: searchResultProducts)
+            return [sectionedData] as [ListDiffable]
+        } else {
+            return sectionedData as [ListDiffable]
+        }
     }
 
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        return ProductSectionController()
+        let sectionController = ProductSectionController()
+        sectionController.isSearchMode = searchController.isActive
+        return sectionController
     }
 
     func emptyView(for listAdapter: ListAdapter) -> UIView? {
         let view = UIView()
         view.backgroundColor = .systemBackground
+        let label = UILabel()
+        label.text = "No product found"
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.font = UIFont.preferredFont(forTextStyle: .title2)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        label.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         return view
     }
 }

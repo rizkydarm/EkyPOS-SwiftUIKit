@@ -6,10 +6,13 @@
 //
 
 import Foundation
+import RealmSwift
 
-class CartProductModel: NSObject {
-    var product: ProductModel
-    var total: Int
+class CartProductModel: Object {
+    
+    @Persisted(primaryKey: true) var _id: String = UUID().uuidString
+    @Persisted var product: ProductModel
+    @Persisted var total: Int
     
     init(product: ProductModel, total: Int) {
         self.product = product

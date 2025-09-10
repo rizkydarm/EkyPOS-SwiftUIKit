@@ -101,20 +101,26 @@ class InvoiceViewController: UIViewController {
         }, for: .touchUpInside)
 
         doneButton.addAction(UIAction { [weak self] _ in
-            guard let invoiceModel = self?.invoiceModel else { return }
-            let productList = List<ProductModel>()
-            productList.append(objectsIn: invoiceModel.checkout.cartProducts.map { $0.product })
+            guard let invoiceModel: InvoiceModel = self?.invoiceModel else { return }
             self?.transactionRepo.addTransaction(
                 totalPrice: invoiceModel.checkout.totalPrice,
                 totalUnit: invoiceModel.checkout.totalUnit, 
                 changes: invoiceModel.changes, 
                 paymentMethod: invoiceModel.paymentMethod,
-                products: productList
+                products: List(array: invoiceModel.checkout.cartProducts)
             ) { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success():
+                if self.isTabletMode {
+                    NotificationCenter.default.post(name: .resetSalesVC, object: nil)
+                    self.presentingViewController?.dismiss(animated: true)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.presentingViewController?.dismiss(animated: true)
+                    }
+                } else {
                     self.navigationController?.setViewControllers([SalesViewController()], animated: true)
+                }
                 case .failure(let error):
                     showToast(.warning, title: "Error", message: error.localizedDescription)
                 }
@@ -215,7 +221,7 @@ extension InvoiceViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
 
-        let product = invoiceModel?.checkout.cartProducts[indexPath.row].product
+        let product: ProductModel? = invoiceModel?.checkout.cartProducts[indexPath.row].product
 
         let emoji = UILabel()
         emoji.textColor = .label

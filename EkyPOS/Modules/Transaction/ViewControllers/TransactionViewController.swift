@@ -74,18 +74,19 @@ class TransactionViewController: UIViewController {
     }
 
     private func groupTransactionsByDate() {
-        // Create a date formatter for the section titles
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
         
-        // Reset our data structures
+        let sectionDateFormatter = DateFormatter()
+        sectionDateFormatter.dateStyle = .medium
+        sectionDateFormatter.timeStyle = .none
+        
+        let sortingDateFormatter = DateFormatter()
+        sortingDateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        
         groupedTransactions = [:]
         sectionTitles = []
         
-        // Group transactions by date string
         for transaction in transactions {
-            let dateString = dateFormatter.string(from: transaction.createdAt)
+            let dateString = sectionDateFormatter.string(from: transaction.createdAt)
             
             if groupedTransactions[dateString] == nil {
                 groupedTransactions[dateString] = [transaction]
@@ -95,17 +96,18 @@ class TransactionViewController: UIViewController {
             }
         }
         
-        // Sort sections by date (newest first)
-        sectionTitles.sort { (dateString1, dateString2) -> Bool in
-            guard let date1 = dateFormatter.date(from: dateString1),
-                  let date2 = dateFormatter.date(from: dateString2) else {
+        sectionTitles.sort { dateString1, dateString2 in
+            guard let date1 = sectionDateFormatter.date(from: dateString1),
+                let date2 = sectionDateFormatter.date(from: dateString2) else {
                 return false
             }
             return date1 > date2
         }
         
         for (key, _) in groupedTransactions {
-            groupedTransactions[key]?.sort { $0.createdAt > $1.createdAt }
+            groupedTransactions[key]?.sort { transaction1, transaction2 in
+                return transaction1.createdAt > transaction2.createdAt
+            }
         }
         
         tableView.reloadData()
@@ -136,9 +138,10 @@ extension TransactionViewController: UITableViewDelegate, UITableViewDataSource 
         let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         cell.backgroundColor = .systemBackground
         
-        let transaction = transactions[indexPath.row]
+        let dateString = sectionTitles[indexPath.section]
+        let transaction = groupedTransactions[dateString]?[indexPath.row] ?? TransactionModel()
         
-        let productsname = transaction.products.map { $0.name }.joined(separator: ", ")
+        let productsname = transaction.cartProducts.map { $0.product.name }.joined(separator: ", ")
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
@@ -183,7 +186,8 @@ extension TransactionViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let transaction = transactions[indexPath.row]
+        let dateString = sectionTitles[indexPath.section]
+        let transaction = groupedTransactions[dateString]?[indexPath.row] ?? TransactionModel()
         let vc = TransactionDetailViewController(transaction: transaction)
         navigationController?.pushViewController(vc, animated: true)
     }

@@ -16,7 +16,7 @@ class TransactionRepo {
         totalUnit: Int, 
         changes: Double, 
         paymentMethod: String, 
-        products: List<ProductModel>,
+        products: List<CartProductModel>,
         completion: @escaping (Result<Void, RepositoryError>) -> Void
     ) {
         realmManager.setup { [weak self] result in
@@ -30,7 +30,7 @@ class TransactionRepo {
                         newTransaction.totalUnit = totalUnit
                         newTransaction.changes = changes
                         newTransaction.paymentMethod = paymentMethod
-                        newTransaction.products = products
+                        newTransaction.cartProducts = products
                         realm.add(newTransaction)
                         completion(.success(()))
                     }

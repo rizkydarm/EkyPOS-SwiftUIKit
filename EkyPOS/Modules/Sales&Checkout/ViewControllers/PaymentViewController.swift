@@ -44,7 +44,7 @@ class PaymentViewController: UIViewController {
 
     private let actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Pay", for: .normal)
+        button.setTitle("Confirm", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         button.backgroundColor = .systemBrown
         button.tintColor = .label
@@ -65,6 +65,17 @@ class PaymentViewController: UIViewController {
         
         title = "Payment"
         view.backgroundColor = .systemBackground
+
+        if let presentingViewController = presentingViewController {
+            let dismissButton = UIBarButtonItem(
+                image: UIImage(systemName: "xmark"),
+                primaryAction: UIAction { [weak self] _ in
+                    guard let self = self else { return }
+                    self.dismiss(animated: true)
+                }
+            )
+            navigationItem.leftBarButtonItem = dismissButton
+        }
 
         let totalPriceLabel = UILabel()
         totalPriceLabel.textColor = .secondaryLabel
@@ -125,7 +136,7 @@ class PaymentViewController: UIViewController {
         let switchLabel = UILabel()
         switchLabel.textColor = .secondaryLabel
         switchLabel.font = .systemFont(ofSize: 16, weight: .bold)
-        switchLabel.text = "Auto nominal"
+        switchLabel.text = "Exact nominal"
         switchLabel.textAlignment = .left
 
         view.addSubview(switchLabel)
@@ -154,7 +165,11 @@ class PaymentViewController: UIViewController {
                 if let checkoutModel = self.checkoutModel {
                     invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel, paymentMethod: "Cash")
                 }
-                self.navigationController?.pushViewController(invoiceVC, animated: true)
+                if isTabletMode {
+                    self.present(invoiceVC, animated: true)
+                } else {
+                    self.navigationController?.pushViewController(invoiceVC, animated: true)
+                }
             } else {
                 let totalPrice = self.checkoutModel?.totalPrice ?? 0
                 self.nominalValue = currencyTextFieldDelegate.getRawValue(for: self.nominalTextField)
@@ -166,7 +181,11 @@ class PaymentViewController: UIViewController {
                         let changes = self.nominalValue - totalPrice
                         invoiceVC.invoiceModel = InvoiceModel(checkout: checkoutModel, paymentMethod: "Cash", changes: changes)
                     }
-                    self.navigationController?.pushViewController(invoiceVC, animated: true)
+                    if isTabletMode {
+                        self.present(invoiceVC, animated: true)
+                    } else {
+                        self.navigationController?.pushViewController(invoiceVC, animated: true)
+                    }
                 }
             }
         }, for: .touchUpInside)
