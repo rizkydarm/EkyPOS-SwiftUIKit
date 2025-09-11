@@ -10,10 +10,10 @@ import RealmSwift
 class TransactionModel: Object {
     @Persisted(primaryKey: true) var _id: String = UUID().uuidString
     @Persisted var createdAt: Date = Date()
-    @Persisted var totalPrice: Double
-    @Persisted var totalUnit: Int
-    @Persisted var changes: Double
-    @Persisted var paymentMethod: String
-    @Persisted var cartProducts: List<CartProductModel> = List<CartProductModel>()
+    @Persisted var totalPrice: Double = 0.0
+    @Persisted var totalUnit: Int = 0
+    @Persisted var changes: Double = 0.0
+    @Persisted var paymentMethod: String = ""
+    @Persisted var cartProducts: List<CartProductModel>
 }
 

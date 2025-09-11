@@ -89,12 +89,12 @@ extension TransactionDetailViewController: UITableViewDelegate, UITableViewDataS
         let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         cell.backgroundColor = .systemBackground
         
-        let product = transaction.cartProducts[indexPath.row]
+        let cart = transaction.cartProducts[indexPath.row]
         
         let emoji = UILabel()
         emoji.textColor = .label
         emoji.font = .systemFont(ofSize: 24, weight: .bold)
-        emoji.text = product.product.image.containsEmoji ? product.product.image : "🟤"
+        emoji.text = (cart.product?.image.containsEmoji ?? false) ? cart.product?.image : "🟤"
         cell.contentView.addSubview(emoji)
         emoji.snp.makeConstraints { make in
             make.left.equalToSuperview().inset(20)
@@ -104,7 +104,7 @@ extension TransactionDetailViewController: UITableViewDelegate, UITableViewDataS
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.text = product.product.name
+        label.text = cart.product?.name ?? "-"
         cell.contentView.addSubview(label)
         label.snp.makeConstraints { make in
             make.left.equalTo(emoji.snp.right).offset(20)
@@ -115,7 +115,7 @@ extension TransactionDetailViewController: UITableViewDelegate, UITableViewDataS
         let amount = UILabel()
         amount.textColor = .label
         amount.font = .systemFont(ofSize: 16, weight: .bold)
-        amount.text = String(product.total)
+        amount.text = String(cart.totalUnit)
         cell.contentView.addSubview(amount)
         amount.snp.makeConstraints { make in
             make.right.equalToSuperview().inset(20)

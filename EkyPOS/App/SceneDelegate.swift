@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-//        deleteRealmDatabase()
+        // deleteRealmDatabase()
         
         window = UIWindow(windowScene: windowScene)
         var rootNavCon: UINavigationController?
@@ -26,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let device = UIDevice.current.userInterfaceIdiom
         let windowWidth = window?.bounds.width ?? 0
         
-        if device == .pad  || device == .mac || windowWidth > 800 {
+        if device == .pad || device == .mac || windowWidth > 800 {
             let splitVC = SalesCheckoutSplitViewController()
             rootNavCon = UINavigationController(rootViewController: splitVC)
             rootNavCon?.isNavigationBarHidden = true

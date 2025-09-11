@@ -16,6 +16,9 @@ class ProductModel: Object {
     @Persisted var name: String = ""
     @Persisted var desc: String = ""
     @Persisted var price: Double = 0.0
+    @Persisted var cost: Double = 0.0
+    @Persisted var stock: Int = 0
+    @Persisted var barcode: String = ""
     @Persisted var image: String = ""
     @Persisted var category: CategoryModel?
 }

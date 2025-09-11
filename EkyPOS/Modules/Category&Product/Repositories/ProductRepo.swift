@@ -13,9 +13,12 @@ class ProductRepo {
     
     func addProduct(
         name: String,
-        description: String,
-        price: Double,
         image: String,
+        price: Double,
+        cost: Double,
+        barcode: String,
+        description: String,
+        stock: Int,
         category: CategoryModel,
         completion: @escaping (Result<Void, RepositoryError>) -> Void
     ) {
@@ -74,9 +77,12 @@ class ProductRepo {
     func updateProduct(
         id: String,
         newName: String? = nil,
-        newDesc: String? = nil,
-        newPrice: Double? = nil,
         newImage: String? = nil,
+        newPrice: Double? = nil,
+        newCost: Double? = nil,
+        newBarcode: String? = nil,
+        newDesc: String? = nil,
+        newStock: Int? = nil,
         newCategory: CategoryModel? = nil,
         completion: @escaping (Result<Void, RepositoryError>) -> Void
     ) {
@@ -88,9 +94,12 @@ class ProductRepo {
                     do {
                         try realm.write {
                             if let newName = newName { product.name = newName }
-                            if let newDesc = newDesc { product.desc = newDesc }
-                            if let newPrice = newPrice { product.price = newPrice }
                             if let newImage = newImage, newImage != product.image { product.image = newImage }
+                            if let newPrice = newPrice { product.price = newPrice }
+                            if let newCost = newCost { product.cost = newCost }
+                            if let newBarcode = newBarcode { product.barcode = newBarcode }
+                            if let newDesc = newDesc { product.desc = newDesc }
+                            if let newStock = newStock { product.stock = newStock }
                             if let newCategory = newCategory { product.category = newCategory }
                         }
                         completion(.success(()))

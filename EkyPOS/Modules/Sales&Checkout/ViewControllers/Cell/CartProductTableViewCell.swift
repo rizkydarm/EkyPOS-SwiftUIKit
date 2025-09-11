@@ -57,21 +57,21 @@ class CartProductTableViewCell: UITableViewCell {
     func configure(with cartProduct: CartProductModel) {
         self.cartProduct = cartProduct
 
-        emoji.text = cartProduct.product.image.containsEmoji ? cartProduct.product.image : "🟤"
+        emoji.text = (cartProduct.product?.image.containsEmoji ?? false) ? cartProduct.product?.image : "🟤"
         contentView.addSubview(emoji)
         emoji.snp.makeConstraints { make in
             make.left.equalToSuperview().inset(20)
             make.centerY.equalToSuperview()
         }
 
-        title.text = cartProduct.product.name
+        title.text = cartProduct.product?.name
         contentView.addSubview(title)
         title.snp.makeConstraints { make in
             make.left.equalTo(emoji.snp.right).offset(20)
             make.centerY.equalToSuperview()
         }
 
-        subtitle.text = rpCurrencyFormatter.string(from: cartProduct.product.price as NSNumber)
+        subtitle.text = rpCurrencyFormatter.string(from: cartProduct.product?.price as? NSNumber ?? 0)
         contentView.addSubview(subtitle)
         subtitle.snp.makeConstraints { make in
             make.left.equalTo(title.snp.right).offset(10)
@@ -84,7 +84,7 @@ class CartProductTableViewCell: UITableViewCell {
             make.centerY.equalToSuperview()
         }
         
-        unitLabel.text = String(cartProduct.total)
+        unitLabel.text = String(cartProduct.totalUnit)
         contentView.addSubview(unitLabel)
         unitLabel.snp.makeConstraints { make in
             make.right.equalTo(incrementButton.snp.left).offset(-20)
@@ -96,19 +96,19 @@ class CartProductTableViewCell: UITableViewCell {
             make.right.equalTo(unitLabel.snp.left).offset(-20)
             make.centerY.equalToSuperview()
         }
-        decrementButton.isEnabled = cartProduct.total > 1
+        decrementButton.isEnabled = cartProduct.totalUnit > 1
         
         decrementButton.addAction(UIAction { [weak self] _ in
             Debouncer.debounce(identifier: "decrementQuantity_\(self.hashValue)", action: {
                 self?.cartCellViewModel.decrementQuantity()
-                self?.cartViewModel.decrementQuantity(for: cartProduct.product)
+                self?.cartViewModel.decrementQuantity(for: cartProduct.product ?? ProductModel())
             })
         }, for: .touchUpInside)
         
         incrementButton.addAction(UIAction { [weak self] _ in
             Debouncer.debounce(identifier: "incrementQuantity_\(self.hashValue)", action: {
                 self?.cartCellViewModel.incrementQuantity()
-                self?.cartViewModel.incrementQuantity(for: cartProduct.product)
+                self?.cartViewModel.incrementQuantity(for: cartProduct.product ?? ProductModel())
             })
         }, for: .touchUpInside)
 
@@ -123,12 +123,12 @@ class CartProductTableViewCell: UITableViewCell {
 
 
     private func setupBindings() {
-        cartCellViewModel.number = cartProduct?.total ?? 0
+        cartCellViewModel.number = cartProduct?.totalUnit ?? 0
         cartCellViewModel.$number
             .receive(on: RunLoop.main)
             .sink { [weak self] total in
                 self?.unitLabel.text = String(total)
-                self?.cartProduct?.total = total
+                self?.cartProduct?.totalUnit = total
                 self?.decrementButton.isEnabled = total > 1
             }
             .store(in: &cancellables)

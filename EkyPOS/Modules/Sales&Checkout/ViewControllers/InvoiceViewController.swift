@@ -255,7 +255,7 @@ extension InvoiceViewController: UITableViewDelegate, UITableViewDataSource {
         let quantityLabel = UILabel()
         quantityLabel.textColor = .label
         quantityLabel.font = .systemFont(ofSize: 16, weight: .bold)
-        quantityLabel.text = "x " + String(invoiceModel?.checkout.cartProducts[indexPath.row].total ?? 0)
+        quantityLabel.text = "x " + String(invoiceModel?.checkout.cartProducts[indexPath.row].totalUnit ?? 0)
         cell.contentView.addSubview(quantityLabel)
         quantityLabel.snp.makeConstraints { make in
             make.right.equalToSuperview().inset(20)

@@ -48,16 +48,6 @@ class SalesViewController: UIViewController {
         let adapter = ListAdapter(updater: updater, viewController: self)
         return adapter
     }()
-
-    private lazy var emptyLabel: UILabel = {
-        let label = UILabel()
-        label.text = "No product"
-        label.textColor = .secondaryLabel
-        label.textAlignment = .center
-        label.font = UIFont.preferredFont(forTextStyle: .title2)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
     
     private lazy var bottomBar: UIView = {
         let view = UIView()
@@ -138,11 +128,6 @@ class SalesViewController: UIViewController {
 
         listAdapter.collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 160, right: 0)
 
-        view.addSubview(emptyLabel)
-        emptyLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleReset),
@@ -167,7 +152,6 @@ class SalesViewController: UIViewController {
             switch result {
             case .success(let products):
                 self.products = products
-                self.emptyLabel.isHidden = !products.isEmpty
             case .failure(let error):
                 showToast(.warning, title: "Error", message: error.localizedDescription)
             }

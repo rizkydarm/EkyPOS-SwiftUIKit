@@ -162,13 +162,13 @@ class CheckoutViewController: UIViewController {
     }
     
     private func updateTotalPrice(cartProducts: [CartProductModel]) {
-        let price = cartProducts.reduce(0) { $0 + ($1.product.price * Double($1.total)) }
+        let price = cartProducts.reduce(0) { $0 + (($1.product?.price ?? 0) * Double($1.totalUnit)) }
         checkoutModel.totalPrice = price
         totalPriceLabel.text = rpCurrencyFormatter.string(from: price as NSNumber)
     }
     
     private func updateTotalUnit(cartProducts: [CartProductModel]) {
-        let units = cartProducts.reduce(0) { $0 + $1.total }
+        let units = cartProducts.reduce(0) { $0 + $1.totalUnit }
         checkoutModel.totalUnit = units
         totalUnitLabel.text = String(units)
     }

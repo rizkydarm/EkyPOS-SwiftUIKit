@@ -13,7 +13,7 @@ class CategoryViewController: UIViewController {
     private var categories: [CategoryModel] = []
     
     private lazy var tableView: UITableView = {
-        let table = UITableView(frame: .zero, style: .plain)
+        let table: UITableView = UITableView(frame: .zero, style: .plain)
         table.backgroundColor = .clear
         return table
     }()
@@ -32,33 +32,20 @@ class CategoryViewController: UIViewController {
     public var mainAppRootNavController: UINavigationController?
     public var menuIndexPage: Int = 1
 
-    var count = 0
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.largeTitleDisplayMode = .always
-        addSearchBar()
-        print("\(count) viewWillAppear")
-        count += 1
+        
+        setupSearchBar() 
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        print("\(count) viewDidLoad")
-        count += 1
         
         title = "Category & Product"
         view.backgroundColor = .systemBackground
-
-        // navigationController?.navigationBar.prefersLargeTitles = true
-        // navigationItem.largeTitleDisplayMode = .always
         
         addMenuButton(mainAppRootNavController: mainAppRootNavController ?? rootNavigationController, menuIndexPage: menuIndexPage)
         addAddCategoryButton()
-
-        
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -77,7 +64,7 @@ class CategoryViewController: UIViewController {
         loadCategories()
     }
 
-    private func addSearchBar() {
+    private func setupSearchBar() {
         searchController.searchBar.placeholder = "Search"
         // searchController.obscuresBackgroundDuringPresentation = false
         // searchController.hidesNavigationBarDuringPresentation = false
@@ -86,6 +73,9 @@ class CategoryViewController: UIViewController {
         // if #available(iOS 16.0, *) {
         //     navigationItem.preferredSearchBarPlacement = .inline
         // }
+
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
 
         searchController.searchBar.searchBarStyle = .default
         searchController.searchBar.tintColor = .label

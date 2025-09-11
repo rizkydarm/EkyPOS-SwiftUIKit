@@ -41,6 +41,26 @@ class AddProductViewController: UIViewController {
         return tf
     }()
 
+    private lazy var costTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Cost"
+        tf.borderStyle = .roundedRect
+        tf.keyboardType = .numberPad
+        tf.autocapitalizationType = .none
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
+
+    private lazy var barcodeTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Barcode"
+        tf.borderStyle = .roundedRect
+        tf.keyboardType = .numberPad
+        tf.autocapitalizationType = .none
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
+
     private lazy var descTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Description"
@@ -50,9 +70,19 @@ class AddProductViewController: UIViewController {
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
+
+    private lazy var stockTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Stock"
+        tf.borderStyle = .roundedRect
+        tf.keyboardType = .numberPad
+        tf.autocapitalizationType = .none
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
     
-    var didInputComplete: ((String, String, Double, String) -> Void)?
-    var editingMode: (oldName: String, oldImage: String, oldPrice: Double, oldDesc: String)?
+    var didInputComplete: ((ProductModel) -> Void)?
+    var editingMode: ProductModel?
     
     private lazy var currencyTextFieldDelegate = CurrencyTextFieldDelegate()
 
@@ -87,26 +117,53 @@ class AddProductViewController: UIViewController {
             primaryAction: UIAction { [weak self] _ in
                 guard let self = self else { return }
                 
-                let priceVal = currencyTextFieldDelegate.getRawValue(for: priceTextField)
-
-                if let name = self.inputTextField.text, !name.isEmpty {
-                    if let emoji = self.imageTextField.text, !emoji.isEmpty, emoji.count == 1, emoji.containsEmoji {
-                        if !priceVal.isZero {
-                            if let desc = self.descTextField.text, !desc.isEmpty {
-                                self.didInputComplete?(name, emoji, priceVal, desc)
-                                self.dismiss(animated: true)
-                            } else {
-                                showToast(.warning, title: "Error", message: "Description is empty")
-                            }
-                        } else {
-                            showToast(.warning, title: "Error", message: "Price is empty")
-                        }
-                    } else {
-                        showToast(.warning, title: "Error", message: "Image is not emoji")
-                    }
-                } else {
+                guard let name = self.inputTextField.text, !name.isEmpty else {
                     showToast(.warning, title: "Error", message: "Name is empty")
+                    return
                 }
+
+                guard let emoji = self.imageTextField.text, !emoji.isEmpty, emoji.count == 1, emoji.containsEmoji else {
+                    showToast(.warning, title: "Error", message: "Image is not emoji or image is empty")
+                    return
+                }
+
+                guard let desc = self.descTextField.text, !desc.isEmpty else {
+                    showToast(.warning, title: "Error", message: "Description is empty")
+                    return
+                }
+
+                let priceVal = currencyTextFieldDelegate.getRawValue(for: priceTextField)
+                if priceVal.isZero {
+                    showToast(.warning, title: "Error", message: "Price is empty")
+                    return
+                }
+
+                let costVal = currencyTextFieldDelegate.getRawValue(for: costTextField)
+                if costVal.isZero {
+                    showToast(.warning, title: "Error", message: "Cost is empty")
+                    return
+                }
+
+                guard let stock = self.stockTextField.text, !stock.isEmpty, let stockInt = Int(stock) else {
+                    showToast(.warning, title: "Error", message: "Stock is empty")
+                    return
+                }
+
+                guard let barcode = self.barcodeTextField.text, !barcode.isEmpty else {
+                    showToast(.warning, title: "Error", message: "Barcode is empty")
+                    return
+                }
+
+                let product = ProductModel()
+                product.name = name
+                product.image = emoji
+                product.price = priceVal
+                product.cost = costVal
+                product.barcode = barcode
+                product.desc = desc
+                product.stock = stockInt
+                self.didInputComplete?(product)
+                self.dismiss(animated: true)
             }
         )
         navigationItem.rightBarButtonItem = checkButton
@@ -136,19 +193,60 @@ class AddProductViewController: UIViewController {
         }
         priceTextField.delegate = currencyTextFieldDelegate
 
+        view.addSubview(costTextField)
+        costTextField.snp.makeConstraints { make in
+            make.top.equalTo(priceTextField.snp.bottom).offset(20)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
+        costTextField.delegate = currencyTextFieldDelegate
+
+        view.addSubview(barcodeTextField)
+        barcodeTextField.snp.makeConstraints { make in
+            make.top.equalTo(costTextField.snp.bottom).offset(20)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
+
+        let generateButton = UIButton(type: .system)
+        generateButton.setTitle("Generate", for: .normal)
+        generateButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+        generateButton.addTarget(self, action: #selector(generateUUID), for: .touchUpInside)
+        
+        generateButton.sizeToFit()
+        
+        barcodeTextField.rightView = generateButton
+        barcodeTextField.rightViewMode = .always
+
+        view.addSubview(stockTextField)
+        stockTextField.snp.makeConstraints { make in
+            make.top.equalTo(barcodeTextField.snp.bottom).offset(20)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(40)
+        }
+
         view.addSubview(descTextField)
         descTextField.snp.makeConstraints { make in
-            make.top.equalTo(priceTextField.snp.bottom).offset(20)
+            make.top.equalTo(stockTextField.snp.bottom).offset(20)
             make.left.right.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
         
         if let editingMode = editingMode {
-            inputTextField.text = editingMode.oldName
-            imageTextField.text = editingMode.oldImage
-            descTextField.text = editingMode.oldDesc
-            priceTextField.text = editingMode.oldPrice.formatted()
+            inputTextField.text = editingMode.name
+            imageTextField.text = editingMode.image
+            descTextField.text = editingMode.desc
+            priceTextField.text = editingMode.price.formatted()
+            costTextField.text = editingMode.cost.formatted()
+            barcodeTextField.text = editingMode.barcode
+            stockTextField.text = String(editingMode.stock)
         }
+    }
+
+    @objc private func generateUUID() {
+        let uuid = UUID().uuidString.replacingOccurrences(of: "-", with: "")
+        let truncatedUUID = String(uuid.prefix(16))
+        barcodeTextField.text = truncatedUUID
     }
     
     override func viewWillAppear(_ animated: Bool) {

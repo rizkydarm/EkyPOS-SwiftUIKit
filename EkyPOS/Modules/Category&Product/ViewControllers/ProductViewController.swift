@@ -57,9 +57,18 @@ class ProductViewController: UIViewController {
             image: UIImage(systemName: "plus.circle.fill")?.withConfiguration(config),
             primaryAction: UIAction { [weak self] _ in
                 let vc = AddProductViewController()
-                vc.didInputComplete = { [weak self] (name, image, price, desc) in
+                vc.didInputComplete = { [weak self] (productTemp) in
                     guard let self = self else { return }
-                    self.productRepo.addProduct(name: name, description: desc, price: price, image: image, category: category) { [weak self] result in
+                    self.productRepo.addProduct(
+                        name: productTemp.name,
+                        image: productTemp.image,
+                        price: productTemp.price,
+                        cost: productTemp.cost,
+                        barcode: productTemp.barcode,
+                        description: productTemp.desc,
+                        stock: productTemp.stock,
+                        category: category
+                    ) { [weak self] result in
                         guard let self = self else { return }
                         switch result {
                         case .success():
@@ -160,11 +169,20 @@ extension ProductViewController: UITableViewDelegate, UITableViewDataSource {
             guard let self = self else { return }
             let vc = AddProductViewController()
             let selectedProduct = products[indexPath.row]
-            vc.editingMode = (selectedProduct.name, selectedProduct.image, selectedProduct.price, selectedProduct.desc)
-            vc.didInputComplete = { [weak self] (text, image, price, desc) in
+            vc.editingMode = selectedProduct
+            vc.didInputComplete = { [weak self] (productTemp) in
                 guard let self = self else { return }
                 let product = products[indexPath.row]
-                productRepo.updateProduct(id: product._id, newName: text, newDesc: desc, newPrice: price, newImage: image) { [weak self] result in
+                productRepo.updateProduct(id: product._id, 
+                    newName: productTemp.name, 
+                    newImage: productTemp.image, 
+                    newPrice: productTemp.price, 
+                    newCost: productTemp.cost, 
+                    newBarcode: productTemp.barcode, 
+                    newDesc: productTemp.desc, 
+                    newStock: productTemp.stock, 
+                    newCategory: productTemp.category
+                ) { [weak self] result in
                     guard let self = self else { return }
                     switch result {
                     case .success():

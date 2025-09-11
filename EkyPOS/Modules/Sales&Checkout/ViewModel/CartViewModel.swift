@@ -25,7 +25,9 @@ class CartViewModel {
     }
     
     private func addCartProduct(_ product: ProductModel) {
-        let cartProduct = CartProductModel(product: product, total: 1)
+        let cartProduct = CartProductModel()
+        cartProduct.product = product
+        cartProduct.totalUnit = 1
         cartProducts.append(cartProduct)
         // cartProductSubject.send(cartProducts)
     }
@@ -47,14 +49,14 @@ class CartViewModel {
 
     func incrementQuantity(for product: ProductModel) {
         guard let index = cartProducts.firstIndex(where: { $0.product == product }) else { return }
-        cartProducts[index].total += 1
+        cartProducts[index].totalUnit += 1
         cartProductSubject.send(cartProducts)
     }
     
     func decrementQuantity(for product: ProductModel) {
         guard let index = cartProducts.firstIndex(where: { $0.product == product }) else { return }
-        if cartProducts[index].total > 1 {
-            cartProducts[index].total -= 1
+        if cartProducts[index].totalUnit > 1 {
+            cartProducts[index].totalUnit -= 1
             cartProductSubject.send(cartProducts)
         }
     }

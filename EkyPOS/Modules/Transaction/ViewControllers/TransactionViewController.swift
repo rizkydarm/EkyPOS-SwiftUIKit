@@ -141,7 +141,7 @@ extension TransactionViewController: UITableViewDelegate, UITableViewDataSource 
         let dateString = sectionTitles[indexPath.section]
         let transaction = groupedTransactions[dateString]?[indexPath.row] ?? TransactionModel()
         
-        let productsname = transaction.cartProducts.map { $0.product.name }.joined(separator: ", ")
+        let productsname = transaction.cartProducts.map { $0.product?.name ?? "-" }.joined(separator: ", ")
         let label = UILabel()
         label.textColor = .label
         label.font = .systemFont(ofSize: 16, weight: .bold)
