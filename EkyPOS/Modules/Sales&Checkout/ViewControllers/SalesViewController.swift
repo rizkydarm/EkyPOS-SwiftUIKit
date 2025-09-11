@@ -33,7 +33,6 @@ class SalesViewController: UIViewController {
     
     public var selectedProducts: Set<ProductModel> = []
 
-    // private lazy var searchSalesController = SearchSalesViewController()
     private lazy var searchController: UISearchController = UISearchController(searchResultsController: nil)
 
     private lazy var listCollectionView: ListCollectionView = {
@@ -71,8 +70,6 @@ class SalesViewController: UIViewController {
         button.enableBounceAnimation()
         return button
     }()
-
-    private var isList = true
 
     public var mainAppRootNavController: UINavigationController?
     public var menuIndexPage: Int = 0
@@ -137,6 +134,51 @@ class SalesViewController: UIViewController {
 
         addBottomBar()
         loadAllProducts()
+
+        let menuButton = UIBarButtonItem(
+            image: UIImage(systemName: "ellipsis"),
+            style: .plain,
+            target: self,
+            action: #selector(showMenu(_:))
+        )
+        
+        let styleButton = UIBarButtonItem(
+            image: UIImage(systemName: "list.bullet.indent"),
+            style: .plain,
+            target: self,
+            action: #selector(changeStyle(_:))
+        )
+        
+        navigationItem.rightBarButtonItems = [menuButton, styleButton]
+
+        allCategories = getAllCategory()
+    }
+
+    private var isList = true
+    @objc private func changeStyle(_ sender: UIBarButtonItem) {
+        sender.image = isList ? UIImage(systemName: "list.bullet.indent") : UIImage(systemName: "rectangle.grid.2x2")
+        isList.toggle()
+    }
+
+    private var allCategories: [CategoryModel] = []
+    private var selectedCategories: Set<CategoryModel> = []
+    private var tempSectionedData: [CategorySectionModel] = []
+    @objc private func showMenu(_ sender: UIBarButtonItem) {
+        let menuVC: CategoryOptionViewController = CategoryOptionViewController()
+        menuVC.availableCategories = allCategories
+        menuVC.selectedCategories = selectedCategories
+        menuVC.didChangeCategory = { [weak self] selectedCategories, unSelectedCategories in
+            guard let self = self else { return }
+            self.selectedCategories = unSelectedCategories
+            self.sectionedData = self.tempSectionedData.filter { selectedCategories.contains($0.category) }
+            // self.listAdapter.performUpdates(animated: true)
+        }
+        menuVC.modalPresentationStyle = .popover
+        menuVC.preferredContentSize = CGSize(width: 240, height: 300)
+        menuVC.popoverPresentationController?.barButtonItem = sender
+        menuVC.popoverPresentationController?.permittedArrowDirections = .up
+        menuVC.popoverPresentationController?.delegate = self // keep arrow & placement
+        present(menuVC, animated: true)
     }
 
     @objc func handleReset() {
@@ -156,6 +198,10 @@ class SalesViewController: UIViewController {
                 showToast(.warning, title: "Error", message: error.localizedDescription)
             }
         }
+    }
+
+    private func getAllCategory() -> [CategoryModel] {
+        return sectionedData.map { $0.category }
     }
 
     private func addSearchBar() {
@@ -256,6 +302,7 @@ extension SalesViewController {
             }
         }
         self.sectionedData = sections
+        self.tempSectionedData = self.sectionedData
     }
 
     func isSelected(product: ProductModel) -> Bool {        
@@ -304,6 +351,17 @@ extension SalesViewController: ListAdapterDataSource {
             make.center.equalToSuperview()
         }
         return view
+    }
+}
+
+extension SalesViewController: UIPopoverPresentationControllerDelegate {
+    
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
+    
+    func popoverPresentationControllerDidDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) {
+        // Handle popover dismissal if needed
     }
 }
 

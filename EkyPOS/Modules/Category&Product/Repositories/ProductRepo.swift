@@ -30,9 +30,12 @@ class ProductRepo {
                     try realm.write {
                         let newProduct = ProductModel()
                         newProduct.name = name
-                        newProduct.desc = description
-                        newProduct.price = price
                         newProduct.image = image
+                        newProduct.price = price
+                        newProduct.cost = cost
+                        newProduct.barcode = barcode
+                        newProduct.desc = description
+                        newProduct.stock = stock
                         newProduct.category = category
                         realm.add(newProduct)
                         completion(.success(()))

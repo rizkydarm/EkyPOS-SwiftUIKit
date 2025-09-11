@@ -65,6 +65,9 @@ class CartProductTableViewCell: UITableViewCell {
         }
 
         title.text = cartProduct.product?.name
+        title.numberOfLines = 1
+        title.lineBreakMode = .byTruncatingTail
+        title.preferredMaxLayoutWidth = 200
         contentView.addSubview(title)
         title.snp.makeConstraints { make in
             make.left.equalTo(emoji.snp.right).offset(20)
@@ -107,8 +110,12 @@ class CartProductTableViewCell: UITableViewCell {
         
         incrementButton.addAction(UIAction { [weak self] _ in
             Debouncer.debounce(identifier: "incrementQuantity_\(self.hashValue)", action: {
-                self?.cartCellViewModel.incrementQuantity()
-                self?.cartViewModel.incrementQuantity(for: cartProduct.product ?? ProductModel())
+                if cartProduct.product?.stock ?? 0 > cartProduct.totalUnit {
+                    self?.cartCellViewModel.incrementQuantity()
+                    self?.cartViewModel.incrementQuantity(for: cartProduct.product ?? ProductModel())
+                } else {
+                    showToast(.warning, title: "Warning", message: "Stock is not enough")
+                }
             })
         }, for: .touchUpInside)
 

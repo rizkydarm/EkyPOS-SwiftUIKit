@@ -44,6 +44,11 @@ extension ProductSectionController: ListBindingSectionControllerSelectionDelegat
 
         guard let category: CategorySectionModel = sectionController.object as? CategorySectionModel else { return }
         let product = category.products[index]
+
+        if product.stock < 1 {
+            showToast(.warning, title: "Warning", message: "Stock is not enough")
+            return
+        }
         
         Debouncer.debounce(identifier: "selectItem_\(index)_\(product._id)", delay: 0.1) { [weak self] in
             guard let self: ProductSectionController = self, let viewController = self.viewController as? SalesViewController else { return }

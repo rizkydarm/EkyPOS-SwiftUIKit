@@ -29,13 +29,11 @@ class CartViewModel {
         cartProduct.product = product
         cartProduct.totalUnit = 1
         cartProducts.append(cartProduct)
-        // cartProductSubject.send(cartProducts)
     }
     
     private func removeCartProduct(_ product: ProductModel) {
         if let index = cartProducts.firstIndex(where: { $0.product == product }) {
             cartProducts.remove(at: index)
-            // cartProductSubject.send(cartProducts)
         }
     }
     
