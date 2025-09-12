@@ -5,15 +5,17 @@ import UIKit
 final class ProductSectionController: ListBindingSectionController<CategorySectionModel> {
 
     public var isSearchMode: Bool = false
+    public var listMode: Bool = true
 
     override required init() {
         super.init()
-        minimumInteritemSpacing = 0
+
+        minimumInteritemSpacing = 10
         minimumLineSpacing = 10
         inset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
 
         self.selectionDelegate = self
-        self.supplementaryViewSource = self    
+        self.supplementaryViewSource = self   
     }
 
     override func numberOfItems() -> Int {
@@ -22,8 +24,18 @@ final class ProductSectionController: ListBindingSectionController<CategorySecti
     
     override func sizeForItem(at index: Int) -> CGSize {
         guard let context = collectionContext else { return .zero }
-        return CGSize(width: context.containerSize.width - inset.left - inset.right, height: 80)
+
+        let width = context.containerSize.width - inset.left - inset.right
+        if listMode {
+            return CGSize(width: width, height: 80)
+        } else {
+            let columns: CGFloat = UIDevice.current.userInterfaceIdiom == .pad ? 3 : 2
+            let spacing: CGFloat = 20
+            let cellWidth = (width - spacing) / columns
+            return CGSize(width: cellWidth, height: cellWidth * 1)
+        }
     }
+
 
     override func cellForItem(at index: Int) -> UICollectionViewCell {
         guard let category = object else { return UICollectionViewCell() }
@@ -33,6 +45,8 @@ final class ProductSectionController: ListBindingSectionController<CategorySecti
         let product = category.products[index]
         
         cell.bindViewModel(product)
+//        cell.updateGridLayout(isList: listMode)
+
         cell.setSelected(viewController.isSelected(product: product))
         
         return cell

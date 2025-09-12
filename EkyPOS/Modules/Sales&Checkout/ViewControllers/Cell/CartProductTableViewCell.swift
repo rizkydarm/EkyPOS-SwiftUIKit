@@ -67,7 +67,7 @@ class CartProductTableViewCell: UITableViewCell {
         title.text = cartProduct.product?.name
         title.numberOfLines = 1
         title.lineBreakMode = .byTruncatingTail
-        title.preferredMaxLayoutWidth = 200
+        // title.preferredMaxLayoutWidth = 200
         contentView.addSubview(title)
         title.snp.makeConstraints { make in
             make.left.equalTo(emoji.snp.right).offset(20)

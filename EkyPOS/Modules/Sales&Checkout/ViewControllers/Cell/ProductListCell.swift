@@ -5,18 +5,18 @@ import IGListKit
 
 class ProductListCell: RippleCollectionViewCell, ListBindable { 
     
-    lazy private var nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let view = UILabel()
         view.textAlignment = .center
         view.textColor = .label
         view.numberOfLines = 1
         view.lineBreakMode = .byTruncatingTail
-        view.preferredMaxLayoutWidth = 200
+        view.preferredMaxLayoutWidth = 100
         view.font = .systemFont(ofSize: 16, weight: .bold)
         return view
     }()
 
-    lazy private var emojiLabel: UILabel = {
+    private lazy var emojiLabel: UILabel = {
         let view = UILabel()
         view.textAlignment = .center
         view.textColor = .label
@@ -24,7 +24,7 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         return view
     }()
 
-    lazy private var priceLabel: UILabel = {
+    private lazy var priceLabel: UILabel = {
         let view = UILabel()
         view.textAlignment = .center
         view.textColor = .secondaryLabel
@@ -32,7 +32,7 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         return view
     }()
 
-    lazy private var stockLabel: UILabel = {
+    private lazy var stockLabel: UILabel = {
         let view = UILabel()
         view.textAlignment = .center
         view.textColor = .secondaryLabel
@@ -40,7 +40,7 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         return view
     }()
 
-    lazy private var categoryLabel: UILabel = {
+    private lazy var categoryLabel: UILabel = {
         let view = UILabel()
         view.textAlignment = .center
         view.textColor = .secondaryLabel
@@ -48,7 +48,7 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         return view
     }()
 
-    lazy private var checkmarkImageView: UIImageView = {
+    private lazy var checkmarkImageView: UIImageView = {
         let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .bold)
         let checkmark = UIImageView(image: UIImage(systemName: "checkmark.circle.fill")?.withConfiguration(config))
         checkmark.tintColor = .systemGreen
@@ -56,8 +56,7 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         return checkmark
     }()
 
-    var product: ProductModel?
-
+    private var product: ProductModel?
     func bindViewModel(_ viewModel: Any) {
         guard let viewModel = viewModel as? ProductModel else { return }
 
@@ -70,8 +69,8 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         categoryLabel.text = viewModel.category?.name ?? "-"
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override init(frame: CGRect) {
@@ -91,16 +90,18 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         layer.cornerRadius = 8
         layer.masksToBounds = true
 
-        emojiLabel.snp.makeConstraints { make in
-            make.width.height.equalTo(40)
-            make.top.left.equalToSuperview().inset(20)
-        }
+         emojiLabel.snp.makeConstraints { make in
+             make.width.height.equalTo(40)
+             make.top.left.equalToSuperview().inset(20)
+         }
         
-        nameLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(20)
-            make.left.equalTo(emojiLabel.snp.right).offset(20)
-            make.right.lessThanOrEqualTo(stockLabel.snp.left).offset(-10)
-        }
+         nameLabel.snp.makeConstraints { make in
+             make.top.equalToSuperview().inset(20)
+             make.left.equalTo(emojiLabel.snp.right).offset(20)
+             make.right.lessThanOrEqualTo(stockLabel.snp.left).offset(-10)
+         }
+
+//        updateGridLayout(isList: true)
         
         priceLabel.snp.makeConstraints { make in
             make.left.equalTo(emojiLabel.snp.right).offset(20)
@@ -121,8 +122,26 @@ class ProductListCell: RippleCollectionViewCell, ListBindable {
         }
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    public func updateGridLayout(isList: Bool) {
+        emojiLabel.snp.remakeConstraints { make in
+            if isList {
+                make.width.height.equalTo(40)
+                make.top.left.equalToSuperview().inset(20)
+            } else {
+                make.width.height.equalTo(60)
+                make.center.equalToSuperview()
+            }
+        }
+        nameLabel.snp.remakeConstraints { make in
+            if isList {
+                make.top.equalToSuperview().inset(20)
+                make.left.equalTo(emojiLabel.snp.right).offset(20)
+                make.right.lessThanOrEqualTo(stockLabel.snp.left).offset(-10)
+            } else {
+                make.top.equalTo(emojiLabel.snp.bottom).inset(20)
+                make.centerY.equalToSuperview()
+            }
+        }
     }
 
     func setSelected(_ isSelected: Bool) {

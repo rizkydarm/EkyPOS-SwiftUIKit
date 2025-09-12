@@ -115,25 +115,21 @@ class SalesViewController: UIViewController {
         view.addSubview(listCollectionView)
         
         listAdapter.dataSource = self 
-
         listCollectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.bottom.equalToSuperview()
         }
-
         listAdapter.collectionView = listCollectionView
-
         listAdapter.collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 160, right: 0)
 
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleReset),
-            name: .resetSalesVC,
-            object: nil
-        )
-
-        addBottomBar()
-        loadAllProducts()
+        if isTabletMode {
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleReset),
+                name: .resetSalesVC,
+                object: nil
+            )
+        }
 
         let menuButton = UIBarButtonItem(
             image: UIImage(systemName: "ellipsis"),
@@ -151,13 +147,46 @@ class SalesViewController: UIViewController {
         
         navigationItem.rightBarButtonItems = [menuButton, styleButton]
 
+        addBottomBar()
+        loadAllProducts()
         allCategories = getAllCategory()
     }
 
     private var isList = true
     @objc private func changeStyle(_ sender: UIBarButtonItem) {
-        sender.image = isList ? UIImage(systemName: "list.bullet.indent") : UIImage(systemName: "rectangle.grid.2x2")
         isList.toggle()
+        
+        sender.image = isList ? UIImage(systemName: "list.bullet.indent") : UIImage(systemName: "rectangle.grid.2x2")
+
+        let layout: UICollectionViewLayout?
+        if isList {
+            let listLayout = ListCollectionViewLayout(stickyHeaders: false, scrollDirection: .vertical, topContentInset: 0, stretchToEdge: false)
+            layout = listLayout
+        } else {
+            let gridLayout = UICollectionViewFlowLayout()
+            // gridLayout.minimumInteritemSpacing = 50
+            // gridLayout.minimumLineSpacing = 50
+            // gridLayout.sectionInset = UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100)
+            layout = gridLayout
+        }
+
+        if let layout = layout {
+            listCollectionView.setCollectionViewLayout(layout, animated: false)
+        }
+
+        for section in listAdapter.visibleSectionControllers() {
+            if let productSection = section as? ProductSectionController {
+                productSection.listMode = isList
+            }
+        }
+
+        if listCollectionView.contentOffset.y > 10 {
+            listCollectionView.setContentOffset(.init(x: 0, y: -100), animated: false)
+            // listCollectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: false)
+        }
+
+        listCollectionView.collectionViewLayout.invalidateLayout()
+        listAdapter.performUpdates(animated: false)
     }
 
     private var allCategories: [CategoryModel] = []
@@ -171,13 +200,12 @@ class SalesViewController: UIViewController {
             guard let self = self else { return }
             self.selectedCategories = unSelectedCategories
             self.sectionedData = self.tempSectionedData.filter { selectedCategories.contains($0.category) }
-            // self.listAdapter.performUpdates(animated: true)
         }
         menuVC.modalPresentationStyle = .popover
         menuVC.preferredContentSize = CGSize(width: 240, height: 300)
         menuVC.popoverPresentationController?.barButtonItem = sender
         menuVC.popoverPresentationController?.permittedArrowDirections = .up
-        menuVC.popoverPresentationController?.delegate = self // keep arrow & placement
+        menuVC.popoverPresentationController?.delegate = self
         present(menuVC, animated: true)
     }
 
@@ -334,6 +362,7 @@ extension SalesViewController: ListAdapterDataSource {
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
         let sectionController = ProductSectionController()
         sectionController.isSearchMode = searchController.isActive
+        sectionController.listMode = isList
         return sectionController
     }
 
