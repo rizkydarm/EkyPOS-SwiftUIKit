@@ -42,7 +42,7 @@ class SalesViewController: UIViewController {
         return collection
     }()
 
-    lazy var listAdapter: ListAdapter = {
+    private lazy var listAdapter: ListAdapter = {
         let updater = ListAdapterUpdater()
         let adapter = ListAdapter(updater: updater, viewController: self)
         return adapter
@@ -158,22 +158,6 @@ class SalesViewController: UIViewController {
         
         sender.image = isList ? UIImage(systemName: "list.bullet.indent") : UIImage(systemName: "rectangle.grid.2x2")
 
-        let layout: UICollectionViewLayout?
-        if isList {
-            let listLayout = ListCollectionViewLayout(stickyHeaders: false, scrollDirection: .vertical, topContentInset: 0, stretchToEdge: false)
-            layout = listLayout
-        } else {
-            let gridLayout = UICollectionViewFlowLayout()
-            // gridLayout.minimumInteritemSpacing = 50
-            // gridLayout.minimumLineSpacing = 50
-            // gridLayout.sectionInset = UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100)
-            layout = gridLayout
-        }
-
-        if let layout = layout {
-            listCollectionView.setCollectionViewLayout(layout, animated: false)
-        }
-
         for section in listAdapter.visibleSectionControllers() {
             if let productSection = section as? ProductSectionController {
                 productSection.listMode = isList
@@ -181,8 +165,7 @@ class SalesViewController: UIViewController {
         }
 
         if listCollectionView.contentOffset.y > 10 {
-            listCollectionView.setContentOffset(.init(x: 0, y: -100), animated: false)
-            // listCollectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: false)
+            listCollectionView.setContentOffset(.init(x: 0, y: -200), animated: false)
         }
 
         listCollectionView.collectionViewLayout.invalidateLayout()
