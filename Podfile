@@ -6,8 +6,6 @@ target 'EkyPOS' do
   use_frameworks!
 
   pod 'Alamofire', :git => 'https://github.com/Alamofire/Alamofire.git'
-
-  # Pods for EkyPOS
   pod 'SnapKit', :git => 'https://github.com/SnapKit/SnapKit.git'
   pod 'RealmSwift', :git => 'https://github.com/realm/realm-swift.git'
   # https://github.com/groue/GRDB.swift
@@ -38,3 +36,6 @@ post_install do |installer|
   end
 end
 
+# .package(url: "https://github.com/SnapKit/SnapKit.git", .upToNextMajor(from: "5.7.1")),
+# .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.10.2")),
+# .package(url: "https://github.com/stephencelis/SQLite.swift.git", .upToNextMajor(from: "0.15.4")),
